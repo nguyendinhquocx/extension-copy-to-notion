@@ -1,0 +1,20 @@
+# AI Experts - Usage Instructions
+
+# This .gitignore is for when you copy .ai-experts folder to your projects
+# It ensures AI tools ignore these files during workspace scanning
+
+# Option 1: Ignore entire folder (recommended for personal use)
+.ai-experts/
+
+# Option 2: Ignore but keep README (for team sharing)
+# .ai-experts/*
+# !.ai-experts/README.md
+
+# Alternative patterns if you rename the folder:
+ai-context/
+docs/ai-experts/
+_prompts/
+*.expert.md
+**/*chuyên-gia*.md
+
+# Note: Choose one option above based on your team's needs
