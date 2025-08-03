@@ -74,16 +74,30 @@ export class TrichXuatText {
       const thoi_gian_xu_ly = performance.now() - bat_dau;
       
       return {
-        thanh_cong: true,
+        url: window.location.href,
+        title: document.title,
         noi_dung,
+        meta_data: metadata as Record<string, any>,
+        thoi_gian_trich_xuat: new Date(),
+        loai_trang: 'general',
+        ngon_ngu: document.documentElement.lang || 'en',
+        do_tin_cay: 0.8,
+        thanh_cong: true,
         metadata,
         thoi_gian_xu_ly,
         so_phan_tu_da_xu_ly: this.demSoPhanTu(phan_tu_da_lam_sach)
       };
     } catch (error) {
       return {
-        thanh_cong: false,
+        url: window.location.href,
+        title: document.title,
         noi_dung: '',
+        meta_data: {} as Record<string, any>,
+        thoi_gian_trich_xuat: new Date(),
+        loai_trang: 'general',
+        ngon_ngu: document.documentElement.lang || 'en',
+        do_tin_cay: 0.1,
+        thanh_cong: false,
         metadata: await this.taoMetadataLoi(element),
         loi: error instanceof Error ? error.message : 'Lỗi không xác định',
         thoi_gian_xu_ly: performance.now() - bat_dau,
@@ -109,7 +123,7 @@ export class TrichXuatText {
         const ket_qua = await this.trichXuatTuPhanTu(element, cau_hinh);
         if (ket_qua.thanh_cong) {
           ket_qua_cac_phan_tu.push(ket_qua.noi_dung);
-          tong_so_phan_tu += ket_qua.so_phan_tu_da_xu_ly;
+          tong_so_phan_tu += ket_qua.so_phan_tu_da_xu_ly || 0;
         } else {
           cac_canh_bao.push(`Lỗi trích xuất phần tử: ${ket_qua.loi}`);
         }
@@ -121,8 +135,15 @@ export class TrichXuatText {
     const noi_dung_hop_nhat = ket_qua_cac_phan_tu.join('\n\n');
     
     return {
-      thanh_cong: ket_qua_cac_phan_tu.length > 0,
+      url: window.location.href,
+      title: document.title,
       noi_dung: noi_dung_hop_nhat,
+      meta_data: await this.taoMetadataChoNhieuPhanTu(elements, noi_dung_hop_nhat) as Record<string, any>,
+      thoi_gian_trich_xuat: new Date(),
+      loai_trang: 'multiple_elements',
+      ngon_ngu: document.documentElement.lang || 'en',
+      do_tin_cay: 0.8,
+      thanh_cong: ket_qua_cac_phan_tu.length > 0,
       metadata: await this.taoMetadataChoNhieuPhanTu(elements, noi_dung_hop_nhat),
       canh_bao: cac_canh_bao.length > 0 ? cac_canh_bao : undefined,
       thoi_gian_xu_ly: 0, // Will be calculated

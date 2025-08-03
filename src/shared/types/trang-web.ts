@@ -110,13 +110,20 @@ export enum DinhDangOutput {
 
 // Kết quả trích xuất
 export interface KetQuaTrichXuat {
-  thanh_cong: boolean;
+  url: string;
+  title: string;
   noi_dung: string;
-  metadata: MetaDataTrichXuat;
+  meta_data: Record<string, any>;
+  thoi_gian_trich_xuat: Date;
+  loai_trang: string;
+  ngon_ngu: string;
+  do_tin_cay: number;
+  thanh_cong?: boolean;
+  metadata?: MetaDataTrichXuat;
   loi?: string;
   canh_bao?: string[];
-  thoi_gian_xu_ly: number;
-  so_phan_tu_da_xu_ly: number;
+  thoi_gian_xu_ly?: number;
+  so_phan_tu_da_xu_ly?: number;
 }
 
 // Metadata trích xuất
