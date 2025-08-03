@@ -25,6 +25,7 @@ export interface CauHinhNguoiDung {
   gioi_han_ky_tu_mac_dinh: number;
   luu_lich_su_local: boolean;
   dong_bo_cau_hinh_cloud: boolean;
+  auto_inject?: boolean; // Tự động inject content script
 }
 
 // Phiên làm việc
