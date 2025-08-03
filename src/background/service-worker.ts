@@ -1,6 +1,7 @@
 /**
  * Service Worker Chính - Main Background Service
  * Điều khiển trung tâm cho extension với Manifest V3
+ * Updated with Step 06: Rich Content Processing & Notion Integration
  */
 
 import { XuLyAPINotion } from './xu-ly-api-notion';
@@ -9,6 +10,9 @@ import { XuLyTinNhan } from './xu-ly-tin-nhan';
 import { QuanLyStorage } from './quan-ly-storage';
 import { XuLyLoi, LoaiLoi } from '../shared/utils/xu-ly-loi';
 import { CauHinhNguoiDung } from '../shared/types/extension';
+import { DieuPhoidNoidungVaNotion } from '../shared/services/dieu-phoi-noi-dung-va-notion';
+import { KetQuaTrichXuat } from '../shared/types/trang-web';
+import { KetNoiNotion } from '../shared/types/notion';
 
 /**
  * Service Worker chính quản lý lifecycle và coordination
@@ -19,6 +23,10 @@ class ServiceWorkerChinh {
   private xu_ly_tin_nhan: XuLyTinNhan;
   private quan_ly_storage: QuanLyStorage;
   private xu_ly_loi: XuLyLoi;
+  
+  // Step 06: Rich Content Processing & Notion Integration
+  private dieu_phoi_noi_dung: DieuPhoidNoidungVaNotion;
+  
   private da_khoi_tao = false;
 
   constructor() {
@@ -27,6 +35,9 @@ class ServiceWorkerChinh {
     this.xu_ly_api = new XuLyAPINotion(this.quan_ly_storage);
     this.quan_ly_tab = new QuanLyTab(this.quan_ly_storage);
     this.xu_ly_tin_nhan = new XuLyTinNhan(this.quan_ly_storage, this.quan_ly_tab, this.xu_ly_api);
+    
+    // Step 06: Rich Content Processing & Notion Integration
+    this.dieu_phoi_noi_dung = new DieuPhoidNoidungVaNotion();
   }
 
   /**
@@ -98,7 +109,10 @@ class ServiceWorkerChinh {
       await this.xu_ly_api.khoi_tao();
       await this.quan_ly_tab.khoi_tao();
       
-      console.log('[Service Worker] Tất cả services đã khởi tạo thành công');
+      // Step 06: Initialize rich content processing orchestrator
+      await this.dieu_phoi_noi_dung.khoi_tao();
+      
+      console.log('[Service Worker] Tất cả services đã được khởi tạo thành công');
     } catch (error) {
       console.error('[Service Worker] Lỗi khởi tạo services:', error);
       throw error;
@@ -258,9 +272,61 @@ class ServiceWorkerChinh {
   async cleanup(): Promise<void> {
     try {
       this.xu_ly_api.ngat_ket_noi();
+      this.dieu_phoi_noi_dung.cleanup();
       console.log('[Service Worker] Cleanup hoàn thành');
     } catch (error) {
       console.error('[Service Worker] Lỗi cleanup:', error);
+    }
+  }
+
+  /**
+   * Step 06: Get rich content processing orchestrator
+   */
+  lay_dieu_phoi_noi_dung(): DieuPhoidNoidungVaNotion {
+    return this.dieu_phoi_noi_dung;
+  }
+
+  /**
+   * Step 06: Process and save content to Notion (public method for message handlers)
+   */
+  async xu_ly_va_luu_noi_dung_vao_notion(
+    ket_qua_trich_xuat: KetQuaTrichXuat,
+    ket_noi_notion: KetNoiNotion
+  ) {
+    try {
+      console.log('[Service Worker] Bắt đầu xử lý và lưu nội dung vào Notion');
+      
+      const ket_qua = await this.dieu_phoi_noi_dung.xu_ly_va_luu_vao_notion(
+        ket_qua_trich_xuat,
+        ket_noi_notion,
+        {
+          auto_retry: true,
+          max_retries: 3,
+          enable_progress_callback: true,
+          progress_callback: (status) => {
+            console.log(`[Service Worker] Progress: ${status.buoc_hien_tai} - ${status.tien_do}%`);
+          }
+        }
+      );
+
+      return ket_qua;
+    } catch (error) {
+      console.error('[Service Worker] Lỗi xử lý và lưu nội dung:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 06: Setup Notion database
+   */
+  async thiet_lap_notion_database(api_key: string) {
+    try {
+      console.log('[Service Worker] Thiết lập Notion database');
+      
+      return await this.dieu_phoi_noi_dung.thiet_lap_notion_database(api_key);
+    } catch (error) {
+      console.error('[Service Worker] Lỗi thiết lập database:', error);
+      throw error;
     }
   }
 }
