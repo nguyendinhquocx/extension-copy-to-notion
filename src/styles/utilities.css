@@ -1,0 +1,250 @@
+/* Custom Utility Classes - Jobs/Ive Minimalist Design System */
+
+/* Spacing Utilities - 8px Grid System */
+.space-nho { margin: theme('spacing.2'); }     /* 8px */
+.space-trung { margin: theme('spacing.4'); }   /* 16px */
+.space-lon { margin: theme('spacing.6'); }     /* 24px */
+.space-xl { margin: theme('spacing.8'); }      /* 32px */
+
+.gap-nho { gap: theme('spacing.2'); }          /* 8px */
+.gap-trung { gap: theme('spacing.4'); }        /* 16px */
+.gap-lon { gap: theme('spacing.6'); }          /* 24px */
+
+/* Typography Utilities - Vietnamese Specific */
+.chu-dam { font-weight: 600; }
+.chu-nhe { font-weight: 400; }
+.chu-mong { font-weight: 300; }
+
+.chu-nho { font-size: theme('fontSize.xs'); }
+.chu-trung { font-size: theme('fontSize.sm'); }
+.chu-lon { font-size: theme('fontSize.base'); }
+.chu-xl { font-size: theme('fontSize.lg'); }
+
+/* Color Utilities - Semantic Vietnamese Names */
+.nen-trang { background-color: var(--mau-nen-chinh); }
+.nen-xam-nhat { background-color: var(--mau-xam-nhat); }
+.nen-xam-nhe { background-color: var(--mau-xam-nhe); }
+
+.chu-den { color: var(--mau-chu-chinh); }
+.chu-xam { color: var(--mau-xam-trung); }
+.chu-xam-nhe { color: var(--mau-xam-nhe); }
+
+.vien-nhe { border: 1px solid var(--mau-xam-nhe); }
+.vien-trung { border: 1px solid var(--mau-xam-trung); }
+
+/* State Utilities - Interactive Feedback */
+.trang-thai-hover:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+  transition: all 0.2s ease-in-out;
+}
+
+.trang-thai-active:active {
+  transform: translateY(0);
+  opacity: 0.9;
+}
+
+.trang-thai-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Focus Utilities - Accessibility */
+.focus-nhe:focus {
+  outline: 2px solid var(--mau-xanh-duong);
+  outline-offset: 2px;
+  border-radius: var(--bo-goc-nho);
+}
+
+.focus-trong:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--mau-nen-chinh), 0 0 0 4px var(--mau-xanh-duong);
+}
+
+/* Shadow Utilities - Subtle Depth */
+.bong-nhe { box-shadow: var(--bong-nhe); }
+.bong-trung { box-shadow: var(--bong-trung); }
+.bong-lon { box-shadow: var(--bong-lon); }
+.bong-khong { box-shadow: none; }
+
+/* Border Radius Utilities - Consistent Curves */
+.bo-goc-nho { border-radius: var(--bo-goc-nho); }
+.bo-goc-trung { border-radius: var(--bo-goc-trung); }
+.bo-goc-lon { border-radius: var(--bo-goc-lon); }
+.bo-goc-tron { border-radius: 50%; }
+
+/* Animation Utilities - Subtle Movements */
+.hieu-ung-fade {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.hieu-ung-slide {
+  animation: slideUp 0.3s ease-out;
+}
+
+.hieu-ung-scale {
+  animation: scaleIn 0.2s ease-out;
+}
+
+.chuyen-tiep-nhe {
+  transition: all 0.2s ease-in-out;
+}
+
+.chuyen-tiep-cham {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Layout Utilities - Extension Specific */
+.extension-width {
+  width: 320px; /* Standard extension popup width */
+}
+
+.extension-height {
+  min-height: 400px; /* Minimum popup height */
+  max-height: 600px; /* Maximum popup height */
+}
+
+.scroll-container {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mau-xam-nhe) transparent;
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: var(--mau-xam-nhe);
+  border-radius: 3px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--mau-xam-trung);
+}
+
+/* Positioning Utilities - Overlay & Modal */
+.overlay-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Flexbox Utilities - Common Patterns */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.flex-col-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Loading States */
+.loading-dots::after {
+  content: '';
+  animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}
+
+/* Responsive Utilities - Extension Constraints */
+@media (max-width: 320px) {
+  .responsive-text {
+    font-size: 0.875rem;
+  }
+  
+  .responsive-padding {
+    padding: theme('spacing.2');
+  }
+}
+
+/* Print Utilities */
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  
+  .print-visible {
+    display: block !important;
+  }
+  
+  .print-no-shadow {
+    box-shadow: none !important;
+  }
+}
+
+/* High Contrast Utilities - Accessibility */
+@media (prefers-contrast: high) {
+  .high-contrast-border {
+    border-width: 2px;
+    border-color: var(--mau-chu-chinh);
+  }
+  
+  .high-contrast-text {
+    color: var(--mau-chu-chinh);
+    font-weight: 600;
+  }
+}
+
+/* Reduced Motion Utilities - Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* Dark Mode Preparation - For Future Implementation */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-ready {
+    /* Placeholder for dark mode styles */
+    /* Will be implemented in future steps */
+  }
+}
