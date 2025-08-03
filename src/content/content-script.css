@@ -1,0 +1,25 @@
+/* Content Script Styles - Minimalist Design */
+/* Đây là placeholder cho Step 05: Content Script styling */
+
+.copy-to-notion-selected {
+  outline: 2px solid var(--mau-xanh-duong, #007bff) !important;
+  outline-offset: 2px !important;
+  background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+.copy-to-notion-number {
+  position: absolute !important;
+  top: -8px !important;
+  right: -8px !important;
+  background: var(--mau-xanh-duong, #007bff) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 20px !important;
+  height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  z-index: 10000 !important;
+}

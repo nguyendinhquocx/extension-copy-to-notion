@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components; 
+@tailwind utilities;
+
+/* CSS Custom Properties cho design consistency */
+:root {
+  /* Color System - Jobs/Ive Minimalist Palette */
+  --mau-nen-chinh: theme('colors.nen-chinh');
+  --mau-chu-chinh: theme('colors.chu-chinh');
+  --mau-xam-nhat: theme('colors.xam-nhat');
+  --mau-xam-nhe: theme('colors.xam-nhe');
+  --mau-xam-trung: theme('colors.xam-trung');
+  
+  /* Typography System */
+  --font-he-thong: theme('fontFamily.he-thong');
+  --font-ma: theme('fontFamily.ma');
+  
+  /* Spacing Grid - 8px system */
+  --khoang-cach-nho: theme('spacing.2');      /* 8px */
+  --khoang-cach-trung: theme('spacing.4');    /* 16px */
+  --khoang-cach-lon: theme('spacing.6');      /* 24px */
+  --khoang-cach-xl: theme('spacing.8');       /* 32px */
+  
+  /* Border Radius */
+  --bo-goc-nho: theme('borderRadius.sm');
+  --bo-goc-trung: theme('borderRadius.DEFAULT');
+  --bo-goc-lon: theme('borderRadius.lg');
+}
+
+/* Global Base Styles - Minimalist Foundation */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-he-thong);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--mau-chu-chinh);
+  background-color: var(--mau-nen-chinh);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background-color: inherit;
+}
+
+/* Typography Hierarchy - Clear và Consistent */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--mau-chu-chinh);
+  margin-bottom: var(--khoang-cach-trung);
+}
+
+h1 { font-size: theme('fontSize.2xl'); }
+h2 { font-size: theme('fontSize.xl'); }
+h3 { font-size: theme('fontSize.lg'); }
+h4 { font-size: theme('fontSize.base'); }
+
+p {
+  margin-bottom: var(--khoang-cach-trung);
+  color: var(--mau-chu-chinh);
+}
+
+/* Interactive Elements - Subtle Transitions */
+button, 
+a,
+[role="button"] {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+button:hover,
+a:hover,
+[role="button"]:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+/* Focus States - Accessibility với Style */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--mau-xanh-duong);
+  outline-offset: 2px;
+}
+
+/* Scroll Behavior - Smooth UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection Styling - Brand Consistent */
+::selection {
+  background-color: var(--mau-xanh-duong);
+  color: white;
+}
