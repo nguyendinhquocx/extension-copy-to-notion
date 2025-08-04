@@ -20,7 +20,10 @@ export class XuLyAPINotion {
    */
   async kiemTraKetNoi(): Promise<boolean> {
     try {
+      console.log('🔄 Checking Notion connection...');
+      
       const apiKey = await this.storage.lay_notion_api_key();
+      console.log('🔑 API key status:', apiKey ? 'Found' : 'Not found');
       
       if (!apiKey) {
         return false;
@@ -36,6 +39,7 @@ export class XuLyAPINotion {
         }
       });
 
+      console.log('📡 Notion API response status:', response.status);
       return response.ok;
     } catch (error) {
       console.error('❌ Notion connection check failed:', error);
@@ -48,12 +52,17 @@ export class XuLyAPINotion {
    */
   async layDatabases() {
     try {
+      console.log('🔄 Getting available databases...');
+      
       const apiKey = await this.storage.lay_notion_api_key();
+      console.log('🔑 API key for databases:', apiKey ? 'Found' : 'Not found');
       
       if (!apiKey) {
         throw new Error('No API key configured');
       }
 
+      console.log('📡 Making search request to Notion API...');
+      
       const response = await fetch('https://api.notion.com/v1/search', {
         method: 'POST',
         headers: {
@@ -73,17 +82,26 @@ export class XuLyAPINotion {
         })
       });
 
+      console.log('📊 Search API response status:', response.status);
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API error response:', errorText);
         throw new Error(`API request failed: ${response.status}`);
       }
 
       const data = await response.json();
-      return data.results.map((db: any) => ({
+      console.log('📋 Raw database results:', data);
+      
+      const databases = data.results.map((db: any) => ({
         id: db.id,
         title: db.title?.[0]?.plain_text || 'Untitled Database',
         url: db.url,
         lastEdited: db.last_edited_time
       }));
+      
+      console.log('✅ Processed databases:', databases);
+      return databases;
     } catch (error) {
       console.error('❌ Failed to get databases:', error);
       throw error;

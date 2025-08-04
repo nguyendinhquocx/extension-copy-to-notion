@@ -39,6 +39,8 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
     
     setIsLoading(true);
     setStatus('Đang lưu API key...');
+    
+    console.log('🔄 Saving API key from popup...');
 
     try {
       const response = await chrome.runtime.sendMessage({
@@ -46,14 +48,19 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         apiKey: apiKey
       });
 
+      console.log('📊 API key save response:', response);
+
       if (response.success) {
         setStatus('API key đã lưu thành công!');
+        console.log('✅ API key saved successfully');
         await loadDatabases();
       } else {
         setStatus('Lỗi: ' + (response.error || 'Không thể lưu API key'));
+        console.error('❌ API key save failed:', response.error);
       }
     } catch (error) {
       setStatus('Lỗi: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error('❌ API key save error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -62,20 +69,29 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const loadDatabases = async () => {
     setIsLoading(true);
     setStatus('Đang tải databases...');
+    
+    console.log('🔄 Loading databases from popup...');
 
     try {
       const response = await chrome.runtime.sendMessage({
         action: 'LAY_DATABASES'
       });
 
+      console.log('📊 Database response in popup:', response);
+
       if (response.success) {
-        setDatabases(response.data.databases || []);
-        setStatus(`Tìm thấy ${response.data.databases?.length || 0} databases`);
+        // Fix: response.data is the array directly, not response.data.databases
+        const databases = response.data || [];
+        setDatabases(databases);
+        setStatus(`Tìm thấy ${databases.length} databases`);
+        console.log(`✅ Loaded ${databases.length} databases:`, databases);
       } else {
         setStatus('Lỗi: ' + (response.error || 'Không thể tải databases'));
+        console.error('❌ Database loading failed:', response.error);
       }
     } catch (error) {
       setStatus('Lỗi: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error('❌ Database loading error:', error);
     } finally {
       setIsLoading(false);
     }

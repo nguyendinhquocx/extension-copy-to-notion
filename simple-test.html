@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Test Page - Copy to Notion</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .test-section { background: #f5f5f5; padding: 15px; margin: 15px 0; border-radius: 8px; }
+        .success { background: #d1f2eb; }
+        .error { background: #ffeaa7; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Page - Copy to Notion Extension</h1>
+    
+    <div class="test-section">
+        <h2>📝 Sample Content</h2>
+        <p>This is a simple test page with sample content to extract.</p>
+        <ul>
+            <li>List item 1</li>
+            <li>List item 2</li>
+        </ul>
+        <p><strong>Bold text</strong> and <em>italic text</em> for formatting test.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Test Instructions</h2>
+        <ol>
+            <li>Load extension từ thư mục <code>dist</code></li>
+            <li>Click extension icon để mở popup</li>
+            <li>Nhập API key Notion</li>
+            <li>Click "Tải Databases"</li>
+            <li>Chọn database và test content extraction</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🐛 Debug Console</h2>
+        <p>Mở Chrome DevTools (F12) và check Console để xem logs:</p>
+        <ul>
+            <li>🚀 Service worker logs</li>
+            <li>📨 Message handling logs</li>
+            <li>🔑 API key status</li>
+            <li>📡 Notion API responses</li>
+            <li>📄 Content extraction results</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('✅ Test page loaded and ready for extension testing');
+        
+        // Add some test data
+        window.testData = {
+            title: document.title,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        };
+        
+        console.log('📊 Test data available:', window.testData);
+    </script>
+</body>
+</html>

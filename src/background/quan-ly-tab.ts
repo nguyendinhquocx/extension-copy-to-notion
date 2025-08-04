@@ -16,8 +16,11 @@ export class QuanLyTab {
    */
   async trichXuatNoiDung(tabId: number) {
     try {
+      console.log('🔄 Starting content extraction for tab:', tabId);
+      
       // Get tab info
       const tab = await chrome.tabs.get(tabId);
+      console.log('📄 Tab info:', { url: tab.url, title: tab.title });
       
       if (!tab.url || tab.url.startsWith('chrome://')) {
         throw new Error('Cannot extract content from this page');
@@ -26,17 +29,22 @@ export class QuanLyTab {
       // Inject content script if needed
       await this.injectContentScriptIfNeeded(tabId);
 
+      console.log('🎯 Executing content extraction script...');
+      
       // Extract content using scripting API
       const results = await chrome.scripting.executeScript({
         target: { tabId },
         func: this.extractPageContent
       });
 
+      console.log('📊 Script execution results:', results);
+
       if (!results || results.length === 0 || !results[0].result) {
         throw new Error('Failed to extract content');
       }
 
       const extractedData = results[0].result;
+      console.log('✅ Content extracted successfully:', extractedData);
       
       return {
         title: extractedData.title || tab.title || 'Untitled',

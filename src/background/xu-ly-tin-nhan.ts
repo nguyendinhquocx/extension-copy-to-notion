@@ -48,6 +48,13 @@ export class XuLyTinNhan {
   }
 
   /**
+   * Initialize storage system
+   */
+  async khoiTaoStorage() {
+    await this.storage.khoi_tao();
+  }
+
+  /**
    * Handle all extension messages
    */
   async xuLyMessage(

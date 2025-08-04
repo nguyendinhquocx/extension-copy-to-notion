@@ -73,8 +73,10 @@ class ContentScriptManager {
       return false;
     }
 
-    // Chỉ support HTTP/HTTPS
-    return window.location.protocol === 'http:' || window.location.protocol === 'https:';
+    // Support HTTP/HTTPS and file:// for testing
+    return window.location.protocol === 'http:' || 
+           window.location.protocol === 'https:' || 
+           window.location.protocol === 'file:';
   }
 
   /**
