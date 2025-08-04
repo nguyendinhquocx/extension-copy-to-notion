@@ -19,6 +19,7 @@ export enum LoaiMessage {
   
   // Tab operations
   TRICH_XUAT_DU_LIEU = 'TRICH_XUAT_DU_LIEU',
+  TRICH_XUAT_DU_LIEU_NANG_CAO = 'TRICH_XUAT_DU_LIEU_NANG_CAO',
   LUU_TRANG_WEB = 'LUU_TRANG_WEB',
   
   // Storage operations
@@ -82,6 +83,9 @@ export class XuLyTinNhan {
         // Content extraction
         case LoaiMessage.TRICH_XUAT_DU_LIEU:
           return await this.trichXuatDuLieu(request.tabId);
+          
+        case LoaiMessage.TRICH_XUAT_DU_LIEU_NANG_CAO:
+          return await this.trichXuatDuLieuNangCao(request.tabId);
 
         case LoaiMessage.LUU_TRANG_WEB:
           return await this.luuTrangWeb(request.tabId, request.data);
@@ -232,6 +236,39 @@ export class XuLyTinNhan {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to extract content'
+      };
+    }
+  }
+  
+  /**
+   * Extract content with advanced rich media extraction
+   */
+  private async trichXuatDuLieuNangCao(tabId: number) {
+    try {
+      console.log('🚀 Starting advanced content extraction for tab:', tabId);
+      
+      // Send message to content script to use the enhanced extraction
+      const response = await chrome.tabs.sendMessage(tabId, {
+        type: 'TRICH_XUAT_TRANG_NANG_CAO'
+      });
+      
+      if (!response || !response.success) {
+        throw new Error(response?.error || 'Advanced extraction failed');
+      }
+      
+      console.log('✅ Advanced content extraction complete with images:', 
+        response.data?.images?.length || 0, 
+        'videos:', response.data?.videos?.length || 0);
+      
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.error('❌ Advanced extraction error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to extract rich content'
       };
     }
   }

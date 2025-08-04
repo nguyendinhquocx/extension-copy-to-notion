@@ -6,12 +6,14 @@
 import { KetQuaTrichXuat } from '../shared/types/trang-web';
 import { TrichXuatNoiDung } from './trich-xuat-noi-dung';
 import { ChonPhanTu } from './chon-phan-tu';
+import { extractFullPageContent } from './trich-xuat-noi-dung-day-du';
 
 /**
  * Message types cho content script
  */
 export type ContentScriptMessage = 
   | { type: 'TRICH_XUAT_TRANG'; data?: any }
+  | { type: 'TRICH_XUAT_TRANG_NANG_CAO'; data?: any }
   | { type: 'TRICH_XUAT_SELECTION'; data?: any }
   | { type: 'PING'; data?: any }
   | { type: 'LAY_THONG_TIN_TRANG'; data?: any }
@@ -85,6 +87,10 @@ export class XuLyTinNhanContent {
         case 'TRICH_XUAT_TRANG':
           await this.xu_ly_trich_xuat_trang(sendResponse);
           break;
+          
+        case 'TRICH_XUAT_TRANG_NANG_CAO':
+          await this.xu_ly_trich_xuat_trang_nang_cao(sendResponse);
+          break;
 
         case 'TRICH_XUAT_SELECTION':
           await this.xu_ly_trich_xuat_selection(sendResponse);
@@ -154,6 +160,28 @@ export class XuLyTinNhanContent {
     } catch (error) {
       this.hien_thi_toast('❌ Lỗi trích xuất nội dung', 'error');
       throw new Error(`Lỗi trích xuất trang: ${error}`);
+    }
+  }
+  
+  /**
+   * Xử lý trích xuất trang nâng cao với hình ảnh, video, và định dạng
+   */
+  private async xu_ly_trich_xuat_trang_nang_cao(sendResponse: (response: ContentScriptResponse) => void): Promise<void> {
+    try {
+      this.hien_thi_toast('🚀 Đang trích xuất nội dung nâng cao...', 'info');
+      
+      // Use the new enhanced extraction method
+      const enhancedContent = await extractFullPageContent();
+      
+      // Send to background for processing
+      await this.gui_den_background('NOI_DUNG_TRICH_XUAT_NANG_CAO', enhancedContent);
+      
+      this.hien_thi_toast(`✅ Đã trích xuất nội dung nâng cao thành công! (${enhancedContent.images.length} ảnh, ${enhancedContent.videos.length} videos)`, 'success');
+      sendResponse({ success: true, data: enhancedContent });
+    } catch (error) {
+      this.hien_thi_toast('❌ Lỗi trích xuất nội dung nâng cao', 'error');
+      console.error('Enhanced extraction error:', error);
+      throw new Error(`Lỗi trích xuất nâng cao: ${error}`);
     }
   }
 

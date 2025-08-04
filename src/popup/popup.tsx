@@ -13,11 +13,24 @@ const CopyToNotionPopup: React.FC = () => {
   const [status, setStatus] = useState<string>('Sẵn sàng');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasNotionConnection, setHasNotionConnection] = useState<boolean>(false);
+  const [useAdvancedExtraction, setUseAdvancedExtraction] = useState<boolean>(true);
 
   // Check Notion connection on load
   useEffect(() => {
     checkNotionConnection();
+    
+    // Check saved preference for advanced extraction
+    chrome.storage.local.get(['useAdvancedExtraction'], (result) => {
+      if (result.useAdvancedExtraction !== undefined) {
+        setUseAdvancedExtraction(result.useAdvancedExtraction);
+      }
+    });
   }, []);
+
+  // Save preference when changed
+  useEffect(() => {
+    chrome.storage.local.set({ useAdvancedExtraction });
+  }, [useAdvancedExtraction]);
 
   const checkNotionConnection = async () => {
     try {
@@ -55,9 +68,9 @@ const CopyToNotionPopup: React.FC = () => {
         throw new Error('Không tìm thấy tab hiện tại');
       }
 
-      // Extract content
+      // Extract content with either basic or advanced method
       const extractResponse = await chrome.runtime.sendMessage({
-        action: 'TRICH_XUAT_DU_LIEU',
+        action: useAdvancedExtraction ? 'TRICH_XUAT_DU_LIEU_NANG_CAO' : 'TRICH_XUAT_DU_LIEU',
         tabId: tab.id
       });
 
@@ -160,6 +173,23 @@ const CopyToNotionPopup: React.FC = () => {
         >
           {isLoading ? 'Đang xử lý...' : '📋 Copy vào Clipboard'}
         </button>
+        
+        {/* Advanced Extraction Toggle */}
+        <div className="flex items-center justify-between py-2 px-3 bg-gray-100 rounded">
+          <div>
+            <div className="text-sm font-medium">Trích xuất nâng cao</div>
+            <div className="text-xs text-gray-500">Bao gồm hình ảnh và video</div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={useAdvancedExtraction}
+              onChange={(e) => setUseAdvancedExtraction(e.target.checked)}
+              className="sr-only peer" 
+            />
+            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
 
         <button
           onClick={handleCheckConnection}

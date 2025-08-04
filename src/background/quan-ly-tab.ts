@@ -90,7 +90,7 @@ export class QuanLyTab {
                   contentSource = 'body-filtered';
                 }
 
-                // Extract text content safely
+                // Extract text content with better formatting preserved
                 if (mainElement) {
                   // Create a clone to avoid modifying original DOM
                   const clonedElement = mainElement.cloneNode(true) as Element;
@@ -111,14 +111,54 @@ export class QuanLyTab {
                     elements.forEach(el => el.remove());
                   });
 
-                  // Get clean text
-                  content = clonedElement.textContent || '';
+                  // Function to extract formatted content preserving structure
+                  const extractStructuredText = (element: Element): string => {
+                    let result = '';
+                    
+                    // Process all child nodes
+                    for (const node of Array.from(element.childNodes)) {
+                      if (node.nodeType === Node.TEXT_NODE) {
+                        // Text node - add content directly
+                        result += node.textContent || '';
+                      } 
+                      else if (node.nodeType === Node.ELEMENT_NODE) {
+                        const el = node as Element;
+                        const tagName = el.tagName.toLowerCase();
+                        
+                        // Handle block elements with proper spacing
+                        if (tagName === 'div' || tagName === 'p' || tagName === 'section' || 
+                            tagName === 'article' || tagName === 'blockquote') {
+                          result += '\n' + extractStructuredText(el) + '\n';
+                        }
+                        // Headers
+                        else if (tagName.match(/^h[1-6]$/)) {
+                          result += '\n\n' + extractStructuredText(el) + '\n\n';
+                        }
+                        // Lists
+                        else if (tagName === 'li') {
+                          result += '\n• ' + extractStructuredText(el);
+                        }
+                        else if (tagName === 'br') {
+                          result += '\n';
+                        }
+                        // All other elements
+                        else {
+                          result += extractStructuredText(el);
+                        }
+                      }
+                    }
+                    return result;
+                  };
                   
-                  // Clean up whitespace and format
+                  // Get structured text
+                  content = extractStructuredText(clonedElement);
+                  
+                  // Preserve basic formatting but clean up excessive whitespace
                   content = content
-                    .replace(/\s+/g, ' ')          // Multiple spaces to single space
-                    .replace(/\n\s*\n/g, '\n')     // Multiple newlines to single
-                    .replace(/^\s+|\s+$/g, '')     // Trim start and end
+                    .replace(/\s*\n\s*/g, '\n')   // Clean up whitespace around newlines
+                    .replace(/\n{3,}/g, '\n\n')   // Max double newlines
+                    .replace(/\t/g, '  ')         // Convert tabs to spaces
+                    .replace(/^\s+|\s+$/g, '')    // Trim start and end
                     .trim();
                     
                   console.log('📄 Extracted content length:', content.length, 'from:', contentSource);
