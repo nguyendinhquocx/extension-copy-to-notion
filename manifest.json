@@ -11,7 +11,9 @@
   "permissions": [
     "activeTab",
     "storage",
-    "scripting"
+    "scripting",
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "https://api.notion.com/*"
@@ -24,7 +26,6 @@
     {
       "matches": ["<all_urls>"],
       "js": ["src/content/content-script.ts"],
-      "css": ["src/content/content-script.css"],
       "run_at": "document_end"
     }
   ],

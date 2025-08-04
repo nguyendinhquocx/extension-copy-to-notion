@@ -38,6 +38,7 @@ export enum LoaiMessage {
   // Tab management
   INJECT_CONTENT_SCRIPT = 'INJECT_CONTENT_SCRIPT',
   KIEM_TRA_TAB_STATUS = 'KIEM_TRA_TAB_STATUS',
+  CONTENT_SCRIPT_READY = 'CONTENT_SCRIPT_READY',
   
   // System
   PING = 'PING',
@@ -211,6 +212,9 @@ export class XuLyTinNhan {
 
       case LoaiMessage.KIEM_TRA_TAB_STATUS:
         return await this.xu_ly_kiem_tra_tab_status(current_tab_id);
+
+      case LoaiMessage.CONTENT_SCRIPT_READY:
+        return this.xu_ly_content_script_ready(current_tab_id);
 
       // System
       case LoaiMessage.PING:
@@ -576,6 +580,26 @@ export class XuLyTinNhan {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Lỗi lấy thông tin extension',
+        timestamp: Date.now()
+      };
+    }
+  }
+
+  /**
+   * Xử lý khi content script ready
+   */
+  private xu_ly_content_script_ready(tab_id?: number): MessageResponse {
+    try {
+      console.log(`[MessageHandler] Content script ready cho tab ${tab_id}`);
+      return {
+        success: true,
+        data: { acknowledged: true },
+        timestamp: Date.now()
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Lỗi xử lý content script ready',
         timestamp: Date.now()
       };
     }
