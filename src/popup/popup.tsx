@@ -1,5 +1,4 @@
 // Popup React Entry Point
-// Đây là placeholder cho Step 06: Popup Interface Foundation & React Setup
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -7,7 +6,7 @@ import '@/styles/globals.css';
 import Settings from './components/Settings';
 import { copyToClipboard } from './copy-clipboard';
 
-// Main popup component
+// Main popup component with minimalist design principles
 const CopyToNotionPopup: React.FC = () => {
   const [currentView, setCurrentView] = useState<'main' | 'settings'>('main');
   const [status, setStatus] = useState<string>('Sẵn sàng');
@@ -148,7 +147,7 @@ const CopyToNotionPopup: React.FC = () => {
       <div className="text-center mb-6">
         <h1 className="text-xl font-semibold mb-2">Copy To Notion</h1>
         <div className="flex items-center justify-center space-x-2">
-          <div className={`w-2 h-2 rounded-full ${hasNotionConnection ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          <div className={`w-2 h-2 rounded-full ${hasNotionConnection ? 'bg-black' : 'bg-gray-400'}`}></div>
           <p className="text-sm text-gray-600">{status}</p>
         </div>
       </div>
@@ -159,19 +158,19 @@ const CopyToNotionPopup: React.FC = () => {
           disabled={isLoading}
           className={`w-full py-3 px-4 rounded font-medium transition-colors ${
             hasNotionConnection 
-              ? 'bg-blue-600 text-white hover:bg-blue-700' 
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-black text-white hover:bg-gray-800' 
+              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {isLoading ? 'Đang xử lý...' : '📄 Sao chép vào Notion'}
+          {isLoading ? 'Đang xử lý...' : 'Lưu vào Notion'}
         </button>
 
         <button
           onClick={handleCopyToClipboard}
           disabled={isLoading}
-          className="w-full py-3 px-4 rounded font-medium transition-colors bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 px-4 rounded font-medium transition-colors bg-gray-200 text-black hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Đang xử lý...' : '📋 Copy vào Clipboard'}
+          {isLoading ? 'Đang xử lý...' : 'Copy vào Clipboard'}
         </button>
         
         {/* Advanced Extraction Toggle */}
@@ -187,47 +186,35 @@ const CopyToNotionPopup: React.FC = () => {
               onChange={(e) => setUseAdvancedExtraction(e.target.checked)}
               className="sr-only peer" 
             />
-            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
           </label>
         </div>
 
         <button
           onClick={handleCheckConnection}
           disabled={isLoading}
-          className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-gray-200 text-black py-2 px-4 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          🔄 Kiểm tra kết nối
+          Kiểm tra kết nối
         </button>
 
         <button
           onClick={handleOpenSettings}
           disabled={isLoading}
-          className="w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-gray-800 text-white py-2 px-4 rounded hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          ⚙️ Cài đặt
-        </button>
-
-        <button
-          onClick={() => chrome.tabs.create({url: chrome.runtime.getURL('debug.html')})}
-          disabled={isLoading}
-          className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-        >
-          🔧 Debug Console
+          Cài đặt
         </button>
       </div>
 
       {/* Quick Setup hint */}
       {!hasNotionConnection && (
-        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
-          <p className="text-yellow-800">
-            💡 <strong>Cài đặt nhanh:</strong> Click "Cài đặt" để nhập Notion API key
+        <div className="mt-4 p-3 bg-gray-100 border border-gray-200 rounded text-sm">
+          <p className="text-gray-800">
+            <strong>Cài đặt nhanh:</strong> Click "Cài đặt" để nhập Notion API key
           </p>
         </div>
       )}
-
-      <div className="mt-4 text-xs text-gray-500 text-center">
-        v1.0.0 - Extension hoạt động {hasNotionConnection ? '✅' : '⚠️'}
-      </div>
     </div>
   );
 };

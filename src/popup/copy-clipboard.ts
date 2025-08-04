@@ -430,7 +430,7 @@ export const copyToClipboard = async (): Promise<{ success: boolean; message: st
     }
     
     // Generate message based on content extracted
-    let successMessage = '✅ Đã copy nội dung với định dạng!';
+    let successMessage = 'Đã copy nội dung với định dạng!';
     
     if (enhancedContent.images?.length) {
       successMessage += ` (${enhancedContent.images.length} ảnh)`;

@@ -40,27 +40,20 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
     setIsLoading(true);
     setStatus('Đang lưu API key...');
     
-    console.log('🔄 Saving API key from popup...');
-
     try {
       const response = await chrome.runtime.sendMessage({
         action: 'LUU_API_KEY',
         apiKey: apiKey
       });
 
-      console.log('📊 API key save response:', response);
-
       if (response.success) {
         setStatus('API key đã lưu thành công!');
-        console.log('✅ API key saved successfully');
         await loadDatabases();
       } else {
         setStatus('Lỗi: ' + (response.error || 'Không thể lưu API key'));
-        console.error('❌ API key save failed:', response.error);
       }
     } catch (error) {
       setStatus('Lỗi: ' + (error instanceof Error ? error.message : 'Unknown error'));
-      console.error('❌ API key save error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -70,28 +63,20 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
     setIsLoading(true);
     setStatus('Đang tải databases...');
     
-    console.log('🔄 Loading databases from popup...');
-
     try {
       const response = await chrome.runtime.sendMessage({
         action: 'LAY_DATABASES'
       });
 
-      console.log('📊 Database response in popup:', response);
-
       if (response.success) {
-        // Fix: response.data is the array directly, not response.data.databases
         const databases = response.data || [];
         setDatabases(databases);
         setStatus(`Tìm thấy ${databases.length} databases`);
-        console.log(`✅ Loaded ${databases.length} databases:`, databases);
       } else {
         setStatus('Lỗi: ' + (response.error || 'Không thể tải databases'));
-        console.error('❌ Database loading failed:', response.error);
       }
     } catch (error) {
       setStatus('Lỗi: ' + (error instanceof Error ? error.message : 'Unknown error'));
-      console.error('❌ Database loading error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -99,10 +84,10 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
 
   const handleSelectDatabase = async () => {
     if (!selectedDatabase) return;
-
+    
     setIsLoading(true);
     setStatus('Đang lưu database...');
-
+    
     try {
       const response = await chrome.runtime.sendMessage({
         action: 'CHON_DATABASE',
@@ -110,7 +95,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
       });
 
       if (response.success) {
-        setStatus('Database đã được chọn thành công!');
+        setStatus('Database đã được chọn!');
       } else {
         setStatus('Lỗi: ' + (response.error || 'Không thể chọn database'));
       }
@@ -122,86 +107,56 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="w-80 bg-white p-6">
-      {/* Header */}
-      <div className="flex items-center mb-6">
-        <button
+    <div className="p-4 bg-white">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-medium">Cài đặt</h2>
+        <button 
           onClick={onBack}
-          className="mr-3 text-gray-600 hover:text-gray-800"
+          className="text-gray-600 hover:text-black"
         >
-          ← Quay lại
+          Quay lại
         </button>
-        <h1 className="text-xl font-semibold">Cài đặt</h1>
       </div>
 
-      {/* Status */}
+      {/* Status display */}
+      {status && (
+        <div className="mb-4 text-sm text-gray-700">{status}</div>
+      )}
+
+      {/* API Key Input */}
       <div className="mb-4">
-        <p className="text-sm text-gray-600">{status}</p>
-      </div>
-
-      {/* API Key Section */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Notion API Key
         </label>
-        <div className="space-y-2">
+        <div className="flex space-x-2">
           <input
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="secret_1234567890abcdef..."
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Nhập Notion API key"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black"
           />
           <button
             onClick={handleSaveApiKey}
-            disabled={isLoading || !apiKey || apiKey === '•••••••••••••••'}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled={isLoading || !apiKey}
+            className="bg-black text-white px-3 py-2 rounded hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Đang lưu...' : 'Lưu API Key'}
+            {isLoading ? 'Đang lưu...' : 'Lưu'}
           </button>
         </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Lấy API key từ: notion.so/my-integrations
-        </p>
-      </div>
-
-      {/* Manual Database ID Input */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">
-          Database ID (Manual)
-        </label>
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={selectedDatabase}
-            onChange={(e) => setSelectedDatabase(e.target.value)}
-            placeholder="32-character database ID..."
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={handleSelectDatabase}
-            disabled={isLoading || !selectedDatabase}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? 'Đang lưu...' : 'Lưu Database ID'}
-          </button>
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Tìm Database ID trong URL của Notion database hoặc sử dụng dropdown bên dưới
-        </p>
       </div>
 
       {/* Database Selection */}
       {databases.length > 0 && (
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-            Hoặc Chọn từ Danh sách
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Chọn Database
           </label>
           <div className="space-y-2">
             <select
               value={selectedDatabase}
               onChange={(e) => setSelectedDatabase(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black"
             >
               <option value="">-- Chọn database --</option>
               {databases.map((db) => (
@@ -213,7 +168,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
             <button
               onClick={handleSelectDatabase}
               disabled={isLoading || !selectedDatabase}
-              className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Đang lưu...' : 'Chọn Database'}
             </button>
@@ -226,23 +181,11 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         <button
           onClick={loadDatabases}
           disabled={isLoading}
-          className="w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-gray-200 text-black py-2 px-4 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Đang tải...' : 'Tải Databases'}
         </button>
       )}
-
-      {/* Instructions */}
-      <div className="mt-6 p-4 bg-gray-50 rounded text-sm">
-        <h3 className="font-medium mb-2">Hướng dẫn:</h3>
-        <ol className="list-decimal list-inside space-y-1 text-gray-600">
-          <li>Tạo Integration tại notion.so/my-integrations</li>
-          <li>Copy API key và paste vào trên</li>
-          <li>Share database với Integration</li>
-          <li>Nhập Database ID thủ công hoặc tải danh sách để chọn</li>
-          <li>Database ID có thể tìm trong URL của Notion page</li>
-        </ol>
-      </div>
     </div>
   );
 };

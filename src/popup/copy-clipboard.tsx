@@ -40,7 +40,7 @@ ${content || 'No content extracted'}
     
     return {
       success: true,
-      message: '✅ Đã copy vào clipboard! Paste vào Notion.'
+      message: 'Đã copy vào clipboard! Paste vào Notion.'
     };
   } catch (error) {
     return {
