@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn test Extension</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f7fafc;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .step h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        .step p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        code {
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #e53e3e;
+        }
+        .path {
+            background: #e6fffa;
+            border: 1px solid #81e6d9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+        }
+        .warning {
+            background: #fffaf0;
+            border: 1px solid #fbd38d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .button {
+            display: inline-block;
+            background: #4299e1;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #3182ce;
+        }
+        .debug-info {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Hướng dẫn Test Chrome Extension</h1>
+        
+        <div class="success">
+            <strong>✅ Extension đã được build thành công!</strong><br>
+            Tất cả các file đã được generate trong thư mục <code>dist/</code>
+        </div>
+
+        <div class="step">
+            <h3>🔧 Bước 1: Load Extension vào Chrome</h3>
+            <p>1. Mở Chrome và truy cập: <code>chrome://extensions/</code></p>
+            <p>2. Bật "Developer mode" ở góc trên bên phải</p>
+            <p>3. Click "Load unpacked" và chọn thư mục:</p>
+            <div class="path">D:\pcloud\code\extension\copy to notion\dist</div>
+        </div>
+
+        <div class="step">
+            <h3>🎯 Bước 2: Test Extension</h3>
+            <p>1. Extension sẽ xuất hiện trong Chrome toolbar</p>
+            <p>2. Click vào icon extension để mở popup</p>
+            <p>3. Nhập API key Notion và test các chức năng</p>
+        </div>
+
+        <div class="step">
+            <h3>🔍 Bước 3: Debug Extension</h3>
+            <p>Để debug extension, bạn có thể:</p>
+            <p>1. <strong>Service Worker:</strong> Chrome Extensions → Details → "Inspect views: service worker"</p>
+            <p>2. <strong>Popup:</strong> Right-click popup → "Inspect"</p>
+            <p>3. <strong>Content Script:</strong> F12 trong trang web → Console</p>
+        </div>
+
+        <div class="step">
+            <h3>🛠️ Debug Console</h3>
+            <p>Extension có debug console riêng để test:</p>
+            <p>1. Load extension vào Chrome như hướng dẫn trên</p>
+            <p>2. Mở debug console bằng cách truy cập:</p>
+            <div class="path">chrome-extension://[EXTENSION-ID]/debug.html</div>
+            <p><em>Thay [EXTENSION-ID] bằng ID extension thực tế từ chrome://extensions/</em></p>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Lưu ý quan trọng:</strong><br>
+            • Debug console chỉ hoạt động trong extension context, không phải webpage thường<br>
+            • Cần load extension vào Chrome trước khi test<br>
+            • Service worker sẽ tự động khởi động khi extension load
+        </div>
+
+        <div class="step">
+            <h3>🐛 Common Issues & Solutions</h3>
+            <p><strong>Lỗi "Unexpected token '{':"</strong></p>
+            <p>→ Do JavaScript minified, kiểm tra trong Chrome DevTools</p>
+            <br>
+            <p><strong>Chrome API undefined:</strong></p>
+            <p>→ Chỉ test trong extension context, không phải standalone HTML</p>
+            <br>
+            <p><strong>Service worker not responding:</strong></p>
+            <p>→ Kiểm tra Chrome Extensions → Details → Errors</p>
+        </div>
+
+        <div class="debug-info">
+# Current Build Status
+Extension Name: Copy To Notion
+Version: 1.0.0
+Build Output: /dist folder
+Service Worker: service-worker-loader.js
+Popup: src/popup/popup.html
+Debug Console: debug.html
+
+# Key Files Generated:
+✓ manifest.json
+✓ service-worker-loader.js  
+✓ assets/service-worker.ts-DNMDW3dg.js
+✓ src/popup/popup.html
+✓ assets/popup.html-DI6IT9jQ.js
+✓ debug.html (custom debug console)
+
+# Next Steps:
+1. Load extension into Chrome
+2. Test popup functionality  
+3. Use debug console for detailed testing
+4. Check Chrome DevTools for any errors
+        </div>
+
+        <div class="success">
+            <strong>🎉 Ready to Test!</strong><br>
+            Extension đã sẵn sàng để test. Hãy load vào Chrome và kiểm tra các chức năng.
+        </div>
+    </div>
+
+    <script>
+        // Show current timestamp
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugInfo = document.querySelector('.debug-info');
+            debugInfo.innerHTML += `\n\n# Generated: ${new Date().toLocaleString('vi-VN')}`;
+        });
+    </script>
+</body>
+</html>

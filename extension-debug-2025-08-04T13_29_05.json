@@ -1,0 +1,257 @@
+[
+  {
+    "timestamp": "2025-08-04T13:28:47.729Z",
+    "type": "info",
+    "message": "⚙️ Testing service worker..."
+  },
+  {
+    "timestamp": "2025-08-04T13:28:47.730Z",
+    "type": "info",
+    "message": "📤 Basic ping test: {\"action\":\"PING\",\"description\":\"Basic ping test\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:47.731Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"message\": \"pong\"\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:47.932Z",
+    "type": "info",
+    "message": "📤 Connection check: {\"action\":\"KIEM_TRA_KET_NOI\",\"description\":\"Connection check\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:48.242Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": {\n    \"hasApiKey\": true,\n    \"hasDatabase\": false,\n    \"isConnected\": true\n  }\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:48.445Z",
+    "type": "info",
+    "message": "📤 Get configuration: {\"action\":\"LAY_CAU_HINH\",\"description\":\"Get configuration\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:48.448Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": null\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:48.655Z",
+    "type": "info",
+    "message": "📤 Extension info: {\"action\":\"GET_EXTENSION_INFO\",\"description\":\"Extension info\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:48.657Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": {\n    \"version\": \"1.0.0\",\n    \"name\": \"Copy To Notion\",\n    \"status\": \"active\"\n  }\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:49.366Z",
+    "type": "info",
+    "message": "🔗 Testing Notion API..."
+  },
+  {
+    "timestamp": "2025-08-04T13:28:49.367Z",
+    "type": "info",
+    "message": "📤 Checking Notion connection: {\"action\":\"KIEM_TRA_KET_NOI\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:49.625Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": {\n    \"hasApiKey\": true,\n    \"hasDatabase\": false,\n    \"isConnected\": true\n  }\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:50.126Z",
+    "type": "info",
+    "message": "📤 Getting databases: {\"action\":\"LAY_DATABASES\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:51.423Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": []\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:51.927Z",
+    "type": "info",
+    "message": "📄 Testing content extraction..."
+  },
+  {
+    "timestamp": "2025-08-04T13:28:51.929Z",
+    "type": "info",
+    "message": "🎯 Testing on tab: undefined (undefined)"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:51.929Z",
+    "type": "info",
+    "message": "📤 Extracting content from current tab: {\"action\":\"TRICH_XUAT_DU_LIEU\",\"tabId\":1681054845}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:51.932Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": false,\n  \"error\": \"Cannot extract content from this page\"\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:51.934Z",
+    "type": "success",
+    "message": "🎉 Full debug flow completed!"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:59.603Z",
+    "type": "info",
+    "message": "🔄 Starting full debug flow..."
+  },
+  {
+    "timestamp": "2025-08-04T13:28:59.603Z",
+    "type": "info",
+    "message": "🔍 Checking extension status..."
+  },
+  {
+    "timestamp": "2025-08-04T13:28:59.604Z",
+    "type": "success",
+    "message": "✅ Extension: Copy To Notion v1.0.0"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:59.604Z",
+    "type": "info",
+    "message": "🆔 Extension ID: eandnkmabkaoocnhomhpimgpggolgegc"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:59.604Z",
+    "type": "info",
+    "message": "📤 Testing ping: {\"action\":\"PING\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:59.609Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"message\": \"pong\"\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:59.610Z",
+    "type": "info",
+    "message": "📤 Getting extension info: {\"action\":\"GET_EXTENSION_INFO\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:28:59.611Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": {\n    \"version\": \"1.0.0\",\n    \"name\": \"Copy To Notion\",\n    \"status\": \"active\"\n  }\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.118Z",
+    "type": "info",
+    "message": "💾 Checking storage..."
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.119Z",
+    "type": "success",
+    "message": "🔑 API key found in storage"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.121Z",
+    "type": "warning",
+    "message": "⚠️ No database selected"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.121Z",
+    "type": "info",
+    "message": "📦 No database cache"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.122Z",
+    "type": "info",
+    "message": "💽 Storage usage: 64 bytes"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.625Z",
+    "type": "info",
+    "message": "⚙️ Testing service worker..."
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.625Z",
+    "type": "info",
+    "message": "📤 Basic ping test: {\"action\":\"PING\",\"description\":\"Basic ping test\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.628Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"message\": \"pong\"\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:00.836Z",
+    "type": "info",
+    "message": "📤 Connection check: {\"action\":\"KIEM_TRA_KET_NOI\",\"description\":\"Connection check\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:01.158Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": {\n    \"hasApiKey\": true,\n    \"hasDatabase\": false,\n    \"isConnected\": true\n  }\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:01.361Z",
+    "type": "info",
+    "message": "📤 Get configuration: {\"action\":\"LAY_CAU_HINH\",\"description\":\"Get configuration\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:01.364Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": null\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:01.570Z",
+    "type": "info",
+    "message": "📤 Extension info: {\"action\":\"GET_EXTENSION_INFO\",\"description\":\"Extension info\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:01.572Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": {\n    \"version\": \"1.0.0\",\n    \"name\": \"Copy To Notion\",\n    \"status\": \"active\"\n  }\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:02.291Z",
+    "type": "info",
+    "message": "🔗 Testing Notion API..."
+  },
+  {
+    "timestamp": "2025-08-04T13:29:02.291Z",
+    "type": "info",
+    "message": "📤 Checking Notion connection: {\"action\":\"KIEM_TRA_KET_NOI\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:02.563Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": {\n    \"hasApiKey\": true,\n    \"hasDatabase\": false,\n    \"isConnected\": true\n  }\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:03.066Z",
+    "type": "info",
+    "message": "📤 Getting databases: {\"action\":\"LAY_DATABASES\"}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:03.347Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": true,\n  \"data\": []\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:03.849Z",
+    "type": "info",
+    "message": "📄 Testing content extraction..."
+  },
+  {
+    "timestamp": "2025-08-04T13:29:03.851Z",
+    "type": "info",
+    "message": "🎯 Testing on tab: undefined (undefined)"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:03.852Z",
+    "type": "info",
+    "message": "📤 Extracting content from current tab: {\"action\":\"TRICH_XUAT_DU_LIEU\",\"tabId\":1681054845}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:03.855Z",
+    "type": "success",
+    "message": "✅ Response: {\n  \"success\": false,\n  \"error\": \"Cannot extract content from this page\"\n}"
+  },
+  {
+    "timestamp": "2025-08-04T13:29:03.855Z",
+    "type": "success",
+    "message": "🎉 Full debug flow completed!"
+  }
+]

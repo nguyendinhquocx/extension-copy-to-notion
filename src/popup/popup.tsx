@@ -150,6 +150,14 @@ const CopyToNotionPopup: React.FC = () => {
         >
           ⚙️ Cài đặt
         </button>
+
+        <button
+          onClick={() => chrome.tabs.create({url: chrome.runtime.getURL('debug.html')})}
+          disabled={isLoading}
+          className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+        >
+          🔧 Debug Console
+        </button>
       </div>
 
       {/* Quick Setup hint */}
