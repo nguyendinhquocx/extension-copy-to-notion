@@ -3,6 +3,8 @@
  * Quản lý tabs và content extraction cho extension
  */
 
+import { SimpleContentExtractor } from '../shared/utils/simple-extractor';
+
 /**
  * Service quản lý tabs và content script injection
  */
@@ -22,145 +24,266 @@ export class QuanLyTab {
       const tab = await chrome.tabs.get(tabId);
       console.log('📄 Tab info:', { url: tab.url, title: tab.title });
       
-      if (!tab.url || tab.url.startsWith('chrome://')) {
+      if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
         throw new Error('Cannot extract content from this page');
       }
 
-      // Inject content script if needed
+      // Ensure content script is loaded
       await this.injectContentScriptIfNeeded(tabId);
 
       console.log('🎯 Executing content extraction script...');
       
-      // Extract content using scripting API
-      const results = await chrome.scripting.executeScript({
-        target: { tabId },
-        func: this.extractPageContent
-      });
+      // Extract content using scripting API with better error handling
+      let results;
+      try {
+        // Use a more robust approach with timeout
+        results = await Promise.race([
+          chrome.scripting.executeScript({
+            target: { tabId },
+            func: () => {
+              // Inline function để avoid method reference issues
+              try {
+                console.log('🎯 Starting content extraction in page context...');
+                console.log('🌐 Current URL:', window.location.href);
+                console.log('📄 Document readyState:', document.readyState);
+                
+                // Get title
+                const title = document.title || 
+                             document.querySelector('h1')?.textContent ||
+                             'Untitled';
 
-      console.log('📊 Script execution results:', results);
+                console.log('📝 Page title:', title);
 
-      if (!results || results.length === 0 || !results[0].result) {
-        throw new Error('Failed to extract content');
+                // Get main content
+                let content = '';
+                let contentSource = 'unknown';
+                
+                // Strategy 1: Try semantic content selectors
+                const contentSelectors = [
+                  'main',
+                  'article', 
+                  '[role="main"]',
+                  '.content',
+                  '.post-content',
+                  '.entry-content',
+                  '.article-content',
+                  '#content',
+                  '.main-content',
+                  '.page-content'
+                ];
+
+                let mainElement = null;
+                for (const selector of contentSelectors) {
+                  const element = document.querySelector(selector);
+                  if (element && element.textContent && element.textContent.trim().length > 100) {
+                    mainElement = element;
+                    contentSource = selector;
+                    console.log('📍 Found main content with selector:', selector);
+                    break;
+                  }
+                }
+
+                // Strategy 2: If no good semantic content, try body but filter out noise
+                if (!mainElement || !mainElement.textContent || mainElement.textContent.trim().length < 50) {
+                  console.log('📍 Using document.body with filtering');
+                  mainElement = document.body;
+                  contentSource = 'body-filtered';
+                }
+
+                // Extract text content safely
+                if (mainElement) {
+                  // Create a clone to avoid modifying original DOM
+                  const clonedElement = mainElement.cloneNode(true) as Element;
+                  
+                  // Remove unwanted elements from clone
+                  const unwantedSelectors = [
+                    'script', 'style', 'noscript',
+                    'nav', 'header', 'footer', 'aside',
+                    '.navigation', '.navbar', '.menu',
+                    '.sidebar', '.widget', '.ad', '.ads',
+                    '.advertisement', '.comments', '.comment',
+                    '.social-share', '.related-posts',
+                    '.cookie-notice', '.newsletter'
+                  ];
+
+                  unwantedSelectors.forEach(selector => {
+                    const elements = clonedElement.querySelectorAll(selector);
+                    elements.forEach(el => el.remove());
+                  });
+
+                  // Get clean text
+                  content = clonedElement.textContent || '';
+                  
+                  // Clean up whitespace and format
+                  content = content
+                    .replace(/\s+/g, ' ')          // Multiple spaces to single space
+                    .replace(/\n\s*\n/g, '\n')     // Multiple newlines to single
+                    .replace(/^\s+|\s+$/g, '')     // Trim start and end
+                    .trim();
+                    
+                  console.log('📄 Extracted content length:', content.length, 'from:', contentSource);
+                }
+
+                // Strategy 3: Fallback to meta description or basic page info
+                if (!content || content.length < 20) {
+                  console.log('📝 Content too short, trying fallbacks...');
+                  
+                  // Try meta description
+                  const metaDesc = document.querySelector('meta[name="description"]');
+                  const metaContent = metaDesc?.getAttribute('content') || '';
+                  
+                  // Try first paragraph
+                  const firstParagraph = document.querySelector('p')?.textContent || '';
+                  
+                  // Try any text content
+                  const bodyText = document.body?.textContent || '';
+                  
+                  // Choose best fallback
+                  if (metaContent && metaContent.length > 20) {
+                    content = metaContent;
+                    contentSource = 'meta-description';
+                  } else if (firstParagraph && firstParagraph.length > 20) {
+                    content = firstParagraph.substring(0, 500);
+                    contentSource = 'first-paragraph';
+                  } else if (bodyText && bodyText.length > 20) {
+                    content = bodyText.substring(0, 1000).trim();
+                    contentSource = 'body-text';
+                  } else {
+                    content = 'Content could not be extracted from this page';
+                    contentSource = 'error-fallback';
+                  }
+                  
+                  console.log('📝 Using fallback content source:', contentSource);
+                }
+
+                // Ensure content is not too long
+                if (content.length > 5000) {
+                  content = content.substring(0, 5000) + '...';
+                }
+
+                const result = {
+                  title: title.trim(),
+                  content: content.trim(),
+                  url: window.location.href,
+                  extractedAt: new Date().toISOString(),
+                  contentSource: contentSource,
+                  pageInfo: {
+                    readyState: document.readyState,
+                    contentLength: content.length,
+                    hasTitle: !!document.title,
+                    hasBody: !!document.body
+                  }
+                };
+
+                console.log('✅ Content extraction completed:', {
+                  title: result.title,
+                  contentLength: result.content.length,
+                  contentSource: result.contentSource,
+                  url: result.url
+                });
+                
+                // Validate result before returning
+                if (!result.title && !result.content) {
+                  console.error('❌ Both title and content are empty!');
+                  return {
+                    title: 'Extraction Failed',
+                    content: 'Could not extract any content from this page',
+                    url: window.location.href,
+                    extractedAt: new Date().toISOString(),
+                    contentSource: 'error',
+                    pageInfo: { error: 'No content found' }
+                  };
+                }
+                
+                return result;
+              } catch (error) {
+                console.error('❌ Content extraction error in page context:', error);
+                // Return minimal data even if extraction fails
+                return {
+                  title: document.title || 'Error',
+                  content: 'Content extraction failed: ' + (error instanceof Error ? error.message : 'Unknown error'),
+                  url: window.location.href,
+                  extractedAt: new Date().toISOString()
+                };
+              }
+            }
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Script execution timeout')), 10000)
+          )
+        ]) as chrome.scripting.InjectionResult<any>[];
+      } catch (scriptError) {
+        console.error('Script execution failed:', scriptError);
+        throw new Error(`Script injection failed: ${scriptError instanceof Error ? scriptError.message : 'Unknown error'}`);
       }
 
-      const extractedData = results[0].result;
-      console.log('✅ Content extracted successfully:', extractedData);
+      console.log('📊 Script execution results:', results);
+      console.log('📊 Results type:', typeof results);
+      console.log('📊 Results length:', results?.length);
+
+      if (!results || results.length === 0) {
+        throw new Error('No results from content extraction script');
+      }
+
+      const firstResult = results[0];
+      console.log('📊 First result:', firstResult);
+      console.log('📊 First result type:', typeof firstResult);
+      console.log('📊 Has result property:', 'result' in firstResult);
+
+      const result = firstResult.result;
+      console.log('📊 Extracted result:', result);
+      console.log('📊 Result type:', typeof result);
+
+      if (!result) {
+        throw new Error('Content extraction script returned null/undefined result');
+      }
+
+      // Additional validation
+      if (typeof result !== 'object') {
+        throw new Error(`Content extraction script returned invalid result type: ${typeof result}`);
+      }
+
+      if (!result.title && !result.content) {
+        throw new Error('Content extraction script returned empty title and content');
+      }
+
+      console.log('✅ Content extracted successfully:', {
+        title: result.title,
+        contentLength: result.content?.length || 0,
+        contentSource: result.contentSource || 'unknown'
+      });
       
       return {
-        title: extractedData.title || tab.title || 'Untitled',
+        title: result.title || tab.title || 'Untitled',
         url: tab.url,
-        content: extractedData.content || '',
+        content: result.content || '',
         extractedAt: new Date().toISOString(),
         domain: new URL(tab.url).hostname
       };
     } catch (error) {
       console.error('❌ Content extraction failed:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Function to inject into page for content extraction
-   */
-  private extractPageContent() {
-    try {
-      console.log('🎯 Starting content extraction in page context...');
       
-      // Remove script and style elements
-      const scripts = document.querySelectorAll('script, style, noscript');
-      scripts.forEach(el => el.remove());
-
-      // Get title
-      const title = document.title || 
-                   document.querySelector('h1')?.textContent ||
-                   'Untitled';
-
-      console.log('📝 Page title:', title);
-
-      // Get main content
-      let content = '';
-      
-      // Try to find main content areas
-      const contentSelectors = [
-        'main',
-        'article',
-        '[role="main"]',
-        '.content',
-        '.post-content',
-        '.entry-content',
-        '.article-content',
-        '#content',
-        '.main-content'
-      ];
-
-      let mainElement = null;
-      for (const selector of contentSelectors) {
-        mainElement = document.querySelector(selector);
-        if (mainElement) {
-          console.log('📍 Found main content with selector:', selector);
-          break;
-        }
-      }
-
-      // If no main content area found, use body
-      if (!mainElement) {
-        console.log('📍 Using document.body as fallback');
-        mainElement = document.body;
-      }
-
-      // Extract text content
-      if (mainElement) {
-        // Remove unwanted elements
-        const unwantedSelectors = [
-          'nav', 'header', 'footer', 'aside',
-          '.navigation', '.navbar', '.menu',
-          '.sidebar', '.widget', '.ad',
-          '.advertisement', '.comments',
-          '.social-share', '.related-posts'
-        ];
-
-        unwantedSelectors.forEach(selector => {
-          const elements = mainElement!.querySelectorAll(selector);
-          elements.forEach(el => el.remove());
-        });
-
-        // Get clean text
-        content = mainElement.textContent || (mainElement as HTMLElement).innerText || '';
+      // Try simple fallback extraction
+      console.log('🔄 Trying fallback extraction...');
+      try {
+        const fallbackResult = await SimpleContentExtractor.extractWithFallback(tabId);
+        console.log('✅ Fallback extraction succeeded:', fallbackResult);
         
-        // Clean up whitespace
-        content = content
-          .replace(/\s+/g, ' ')
-          .replace(/\n\s*\n/g, '\n')
-          .trim();
-          
-        console.log('📄 Extracted content length:', content.length);
+        const tab = await chrome.tabs.get(tabId);
+        return {
+          title: fallbackResult.title || tab.title || 'Untitled',
+          url: tab.url || '',
+          content: fallbackResult.content || '',
+          extractedAt: new Date().toISOString(),
+          domain: tab.url ? new URL(tab.url).hostname : 'unknown',
+          extractionMethod: fallbackResult.method || 'fallback'
+        };
+      } catch (fallbackError) {
+        console.error('❌ Fallback extraction also failed:', fallbackError);
+        // Return a more descriptive error
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error during content extraction';
+        throw new Error(`Content extraction failed: ${errorMessage}`);
       }
-
-      // Get meta description as fallback
-      if (!content) {
-        const metaDesc = document.querySelector('meta[name="description"]');
-        content = metaDesc?.getAttribute('content') || 'No content could be extracted';
-        console.log('📝 Using meta description as fallback');
-      }
-
-      const result = {
-        title: title.trim(),
-        content: content.substring(0, 5000), // Limit content length
-        url: window.location.href,
-        extractedAt: new Date().toISOString()
-      };
-
-      console.log('✅ Content extraction completed:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Content extraction error in page context:', error);
-      // Return minimal data even if extraction fails
-      return {
-        title: document.title || 'Error',
-        content: 'Content extraction failed: ' + (error instanceof Error ? error.message : 'Unknown error'),
-        url: window.location.href,
-        extractedAt: new Date().toISOString()
-      };
     }
   }
 
