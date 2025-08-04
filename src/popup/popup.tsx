@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import '@/styles/globals.css';
 import Settings from './components/Settings';
+import { copyToClipboard } from './copy-clipboard';
 
 // Main popup component
 const CopyToNotionPopup: React.FC = () => {
@@ -89,6 +90,23 @@ const CopyToNotionPopup: React.FC = () => {
     }
   };
 
+  const handleCopyToClipboard = async () => {
+    setIsLoading(true);
+    setStatus('Đang trích xuất nội dung...');
+    
+    const result = await copyToClipboard();
+    setStatus(result.message);
+    
+    if (result.success) {
+      // Auto close popup after 3 seconds
+      setTimeout(() => {
+        window.close();
+      }, 3000);
+    }
+    
+    setIsLoading(false);
+  };
+
   const handleCheckConnection = async () => {
     setIsLoading(true);
     setStatus('Đang kiểm tra kết nối...');
@@ -132,7 +150,15 @@ const CopyToNotionPopup: React.FC = () => {
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {isLoading ? 'Đang xử lý...' : '📄 Sao chép trang này'}
+          {isLoading ? 'Đang xử lý...' : '📄 Sao chép vào Notion'}
+        </button>
+
+        <button
+          onClick={handleCopyToClipboard}
+          disabled={isLoading}
+          className="w-full py-3 px-4 rounded font-medium transition-colors bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Đang xử lý...' : '📋 Copy vào Clipboard'}
         </button>
 
         <button

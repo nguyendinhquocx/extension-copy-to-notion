@@ -165,11 +165,37 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         </p>
       </div>
 
+      {/* Manual Database ID Input */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">
+          Database ID (Manual)
+        </label>
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={selectedDatabase}
+            onChange={(e) => setSelectedDatabase(e.target.value)}
+            placeholder="32-character database ID..."
+            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={handleSelectDatabase}
+            disabled={isLoading || !selectedDatabase}
+            className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isLoading ? 'Đang lưu...' : 'Lưu Database ID'}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Tìm Database ID trong URL của Notion database hoặc sử dụng dropdown bên dưới
+        </p>
+      </div>
+
       {/* Database Selection */}
       {databases.length > 0 && (
         <div className="mb-6">
           <label className="block text-sm font-medium mb-2">
-            Chọn Database
+            Hoặc Chọn từ Danh sách
           </label>
           <div className="space-y-2">
             <select
@@ -213,7 +239,8 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
           <li>Tạo Integration tại notion.so/my-integrations</li>
           <li>Copy API key và paste vào trên</li>
           <li>Share database với Integration</li>
-          <li>Chọn database từ danh sách</li>
+          <li>Nhập Database ID thủ công hoặc tải danh sách để chọn</li>
+          <li>Database ID có thể tìm trong URL của Notion page</li>
         </ol>
       </div>
     </div>
