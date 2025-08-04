@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Quick Extension Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; line-height: 1.6; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; max-height: 300px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Quick Extension Test</h1>
+    
+    <h2>📝 Sample Content</h2>
+    <p>This is a test page with sample content to extract.</p>
+    <ul>
+        <li>Test item 1</li>
+        <li>Test item 2 with <strong>bold text</strong></li>
+        <li>Test item 3 with <em>italic text</em></li>
+    </ul>
+    
+    <h3>More Content</h3>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    
+    <div id="status"></div>
+    
+    <h2>🔧 Test Actions</h2>
+    <button onclick="testPing()">1. Test Extension Ping</button>
+    <button onclick="testExtraction()">2. Test Content Extraction</button>
+    <button onclick="checkServiceWorker()">3. Check Service Worker</button>
+    <button onclick="clearLogs()">Clear Logs</button>
+    
+    <h2>📋 Debug Logs</h2>
+    <pre id="logs"></pre>
+
+    <script>
+        let logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push(logEntry);
+            updateLogsDisplay();
+            console.log(logEntry);
+        }
+        
+        function updateLogsDisplay() {
+            document.getElementById('logs').textContent = logs.slice(-15).join('\n');
+        }
+        
+        function setStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+        
+        function clearLogs() {
+            logs = [];
+            updateLogsDisplay();
+            setStatus('Logs cleared', 'success');
+        }
+        
+        async function testPing() {
+            try {
+                log('🔄 Testing extension ping...');
+                setStatus('Testing extension ping...', 'warning');
+                
+                const response = await chrome.runtime.sendMessage({ action: 'PING' });
+                log('✅ Ping response: ' + JSON.stringify(response));
+                
+                if (response && response.success) {
+                    setStatus('Extension is responding!', 'success');
+                } else {
+                    setStatus('Extension ping failed', 'error');
+                }
+            } catch (error) {
+                log('❌ Ping error: ' + error.message);
+                setStatus('Extension ping error: ' + error.message, 'error');
+            }
+        }
+        
+        async function testExtraction() {
+            try {
+                log('🔄 Testing content extraction...');
+                setStatus('Testing content extraction...', 'warning');
+                
+                // Get current tab
+                const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (!tabs[0]) {
+                    throw new Error('No active tab found');
+                }
+                
+                log('📄 Active tab ID: ' + tabs[0].id);
+                
+                const response = await chrome.runtime.sendMessage({
+                    action: 'TRICH_XUAT_DU_LIEU',
+                    tabId: tabs[0].id
+                });
+                
+                log('📊 Extraction response: ' + JSON.stringify(response, null, 2));
+                
+                if (response && response.success) {
+                    setStatus('Content extraction successful!', 'success');
+                    log('✅ Extracted title: ' + response.data.title);
+                    log('✅ Content length: ' + response.data.content.length + ' chars');
+                } else {
+                    setStatus('Content extraction failed: ' + (response?.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                log('❌ Extraction error: ' + error.message);
+                setStatus('Content extraction error: ' + error.message, 'error');
+            }
+        }
+        
+        async function checkServiceWorker() {
+            try {
+                log('🔄 Checking service worker status...');
+                setStatus('Checking service worker...', 'warning');
+                
+                const response = await chrome.runtime.sendMessage({ action: 'GET_EXTENSION_INFO' });
+                log('📊 Extension info: ' + JSON.stringify(response));
+                
+                if (response && response.success) {
+                    setStatus('Service worker is active!', 'success');
+                    log('✅ Extension version: ' + response.data.version);
+                } else {
+                    setStatus('Service worker check failed', 'error');
+                }
+            } catch (error) {
+                log('❌ Service worker check error: ' + error.message);
+                setStatus('Service worker error: ' + error.message, 'error');
+            }
+        }
+        
+        // Initialize
+        log('🚀 Test page loaded');
+        
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            log('✅ Chrome extension API available');
+            setStatus('Extension context is available', 'success');
+        } else {
+            log('❌ Chrome extension API not available');
+            setStatus('Extension context NOT available', 'error');
+        }
+        
+        // Auto test ping on load
+        setTimeout(() => {
+            testPing();
+        }, 1000);
+    </script>
+</body>
+</html>

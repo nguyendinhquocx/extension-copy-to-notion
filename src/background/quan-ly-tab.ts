@@ -63,80 +63,105 @@ export class QuanLyTab {
    * Function to inject into page for content extraction
    */
   private extractPageContent() {
-    // Remove script and style elements
-    const scripts = document.querySelectorAll('script, style, noscript');
-    scripts.forEach(el => el.remove());
+    try {
+      console.log('🎯 Starting content extraction in page context...');
+      
+      // Remove script and style elements
+      const scripts = document.querySelectorAll('script, style, noscript');
+      scripts.forEach(el => el.remove());
 
-    // Get title
-    const title = document.title || 
-                 document.querySelector('h1')?.textContent ||
-                 'Untitled';
+      // Get title
+      const title = document.title || 
+                   document.querySelector('h1')?.textContent ||
+                   'Untitled';
 
-    // Get main content
-    let content = '';
-    
-    // Try to find main content areas
-    const contentSelectors = [
-      'main',
-      'article',
-      '[role="main"]',
-      '.content',
-      '.post-content',
-      '.entry-content',
-      '.article-content',
-      '#content',
-      '.main-content'
-    ];
+      console.log('📝 Page title:', title);
 
-    let mainElement = null;
-    for (const selector of contentSelectors) {
-      mainElement = document.querySelector(selector);
-      if (mainElement) break;
-    }
-
-    // If no main content area found, use body
-    if (!mainElement) {
-      mainElement = document.body;
-    }
-
-    // Extract text content
-    if (mainElement) {
-      // Remove unwanted elements
-      const unwantedSelectors = [
-        'nav', 'header', 'footer', 'aside',
-        '.navigation', '.navbar', '.menu',
-        '.sidebar', '.widget', '.ad',
-        '.advertisement', '.comments',
-        '.social-share', '.related-posts'
+      // Get main content
+      let content = '';
+      
+      // Try to find main content areas
+      const contentSelectors = [
+        'main',
+        'article',
+        '[role="main"]',
+        '.content',
+        '.post-content',
+        '.entry-content',
+        '.article-content',
+        '#content',
+        '.main-content'
       ];
 
-      unwantedSelectors.forEach(selector => {
-        const elements = mainElement!.querySelectorAll(selector);
-        elements.forEach(el => el.remove());
-      });
+      let mainElement = null;
+      for (const selector of contentSelectors) {
+        mainElement = document.querySelector(selector);
+        if (mainElement) {
+          console.log('📍 Found main content with selector:', selector);
+          break;
+        }
+      }
 
-      // Get clean text
-      content = mainElement.textContent || (mainElement as HTMLElement).innerText || '';
-      
-      // Clean up whitespace
-      content = content
-        .replace(/\s+/g, ' ')
-        .replace(/\n\s*\n/g, '\n')
-        .trim();
+      // If no main content area found, use body
+      if (!mainElement) {
+        console.log('📍 Using document.body as fallback');
+        mainElement = document.body;
+      }
+
+      // Extract text content
+      if (mainElement) {
+        // Remove unwanted elements
+        const unwantedSelectors = [
+          'nav', 'header', 'footer', 'aside',
+          '.navigation', '.navbar', '.menu',
+          '.sidebar', '.widget', '.ad',
+          '.advertisement', '.comments',
+          '.social-share', '.related-posts'
+        ];
+
+        unwantedSelectors.forEach(selector => {
+          const elements = mainElement!.querySelectorAll(selector);
+          elements.forEach(el => el.remove());
+        });
+
+        // Get clean text
+        content = mainElement.textContent || (mainElement as HTMLElement).innerText || '';
+        
+        // Clean up whitespace
+        content = content
+          .replace(/\s+/g, ' ')
+          .replace(/\n\s*\n/g, '\n')
+          .trim();
+          
+        console.log('📄 Extracted content length:', content.length);
+      }
+
+      // Get meta description as fallback
+      if (!content) {
+        const metaDesc = document.querySelector('meta[name="description"]');
+        content = metaDesc?.getAttribute('content') || 'No content could be extracted';
+        console.log('📝 Using meta description as fallback');
+      }
+
+      const result = {
+        title: title.trim(),
+        content: content.substring(0, 5000), // Limit content length
+        url: window.location.href,
+        extractedAt: new Date().toISOString()
+      };
+
+      console.log('✅ Content extraction completed:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Content extraction error in page context:', error);
+      // Return minimal data even if extraction fails
+      return {
+        title: document.title || 'Error',
+        content: 'Content extraction failed: ' + (error instanceof Error ? error.message : 'Unknown error'),
+        url: window.location.href,
+        extractedAt: new Date().toISOString()
+      };
     }
-
-    // Get meta description as fallback
-    if (!content) {
-      const metaDesc = document.querySelector('meta[name="description"]');
-      content = metaDesc?.getAttribute('content') || 'No content could be extracted';
-    }
-
-    return {
-      title: title.trim(),
-      content: content.substring(0, 5000), // Limit content length
-      url: window.location.href,
-      extractedAt: new Date().toISOString()
-    };
   }
 
   /**
