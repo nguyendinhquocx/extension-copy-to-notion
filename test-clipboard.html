@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copy to Notion Extension Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1em 0;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        blockquote {
+            border-left: 3px solid #ddd;
+            padding-left: 1em;
+            color: #555;
+        }
+        .test-section {
+            margin-bottom: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #0366d6;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #0255b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Copy to Notion Extension Test Page</h1>
+    <p>This page is designed to test the Copy to Notion extension's clipboard functionality.</p>
+
+    <div class="test-section">
+        <h2>Test Section 1: Links and Formatting</h2>
+        <p>This paragraph contains <a href="https://www.notion.so">a link to Notion</a> which should be properly formatted in markdown as <code>[a link to Notion](https://www.notion.so)</code>.</p>
+        <p>Here's some <strong>bold text</strong> and <em>italic text</em> that should be preserved.</p>
+        <p>Here's a <code>code snippet</code> that should appear properly formatted.</p>
+        <pre><code>// This is a code block
+function testFunction() {
+    return "Hello, Notion!";
+}</code></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Section 2: Lists</h2>
+        <h3>Unordered List</h3>
+        <ul>
+            <li>First item in an unordered list</li>
+            <li>Second item with <a href="https://example.com">a link</a></li>
+            <li>Third item with <strong>bold text</strong></li>
+        </ul>
+        
+        <h3>Ordered List</h3>
+        <ol>
+            <li>First item in an ordered list</li>
+            <li>Second item with <a href="https://example.com">a link</a></li>
+            <li>Third item with <strong>bold text</strong></li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Section 3: Images</h2>
+        <p>Below is an image that should be preserved in its original position:</p>
+        <img src="https://via.placeholder.com/600x400" alt="Placeholder Image">
+        <p>The image above should appear in Notion exactly where it appears here, not at the end of the copied content.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Section 4: Blockquotes</h2>
+        <blockquote>
+            This is a blockquote. It should be preserved with the proper formatting in Notion.
+            <p>This is a paragraph inside the blockquote.</p>
+        </blockquote>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Section 5: Headers</h2>
+        <h1>Level 1 Header</h1>
+        <h2>Level 2 Header</h2>
+        <h3>Level 3 Header</h3>
+        <h4>Level 4 Header</h4>
+        <h5>Level 5 Header</h5>
+        <h6>Level 6 Header</h6>
+    </div>
+
+    <p>Click the extension button to test copying this page to Notion!</p>
+    <a href="#" class="button" onclick="alert('Please use the Copy to Notion extension button in your browser toolbar.')">Simulate Copy to Notion</a>
+</body>
+</html>

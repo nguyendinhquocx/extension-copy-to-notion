@@ -182,29 +182,58 @@ const extractFullPageContent = async (tabId: number): Promise<EnhancedContent> =
                 case 'p':
                   return '\n\n' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
                 case 'h1':
+                  return '\n\n# ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
                 case 'h2':
+                  return '\n\n## ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
                 case 'h3':
+                  return '\n\n### ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
                 case 'h4':
+                  return '\n\n#### ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
                 case 'h5':
+                  return '\n\n##### ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
                 case 'h6':
-                  return '\n\n' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
+                  return '\n\n###### ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
                 case 'div':
                   return '\n' + Array.from(element.childNodes).map(processNode).join('') + '\n';
+                case 'ul':
+                  return '\n' + Array.from(element.childNodes).map(processNode).join('') + '\n';
+                case 'ol':
+                  // Track ordered list items properly
+                  let index = 1;
+                  return '\n' + Array.from(element.childNodes)
+                    .filter(node => node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === 'li')
+                    .map(node => {
+                      const content = processNode(node).replace(/^•\s+/, ''); // Remove bullet if present
+                      return `${index++}. ${content}`;
+                    })
+                    .join('\n') + '\n';
                 case 'li':
+                  const parent = element.parentElement;
+                  if (parent && parent.tagName.toLowerCase() === 'ol') {
+                    // This will be handled by the ol case
+                    return Array.from(element.childNodes).map(processNode).join('');
+                  }
                   return '\n• ' + Array.from(element.childNodes).map(processNode).join('');
                 case 'a':
                   const href = (element as HTMLAnchorElement).href;
                   const text = Array.from(element.childNodes).map(processNode).join('').trim();
-                  return `${text} (${href})`;
+                  return `[${text}](${href})`;
                 case 'img':
                   const alt = (element as HTMLImageElement).alt;
-                  return alt ? `[Image: ${alt}]` : '[Image]';
+                  const src = (element as HTMLImageElement).src;
+                  return `![${alt || 'Image'}](${src})`;
                 case 'strong':
                 case 'b':
                   return '**' + Array.from(element.childNodes).map(processNode).join('') + '**';
                 case 'em':
                 case 'i':
                   return '_' + Array.from(element.childNodes).map(processNode).join('') + '_';
+                case 'code':
+                  return '`' + Array.from(element.childNodes).map(processNode).join('') + '`';
+                case 'pre':
+                  return '\n```\n' + Array.from(element.childNodes).map(processNode).join('') + '\n```\n';
+                case 'blockquote':
+                  return '\n> ' + Array.from(element.childNodes).map(processNode).join('').replace(/\n/g, '\n> ') + '\n';
                 default:
                   return Array.from(element.childNodes).map(processNode).join('');
               }
@@ -257,134 +286,77 @@ const extractFullPageContent = async (tabId: number): Promise<EnhancedContent> =
   }
 };
 
-// Function to sanitize and format content for HTML
-const formatContentAsHTML = (content: EnhancedContent): string => {
-  // Ensure content is properly escaped HTML
-  const escapeHTML = (text: string): string => {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  };
-  
-  // Generate HTML for images
-  const generateImagesHTML = (images: EnhancedContent['images'] = []): string => {
-    if (!images.length) return '';
-    
-    return `<div class="image-gallery">
-      ${images.map(img => `
-        <figure>
-          <img src="${escapeHTML(img.url)}" alt="${escapeHTML(img.alt || '')}" loading="lazy">
-          ${img.alt ? `<figcaption>${escapeHTML(img.alt)}</figcaption>` : ''}
-        </figure>
-      `).join('')}
-    </div>`;
-  };
-  
-  // Generate HTML for videos
-  const generateVideosHTML = (videos: EnhancedContent['videos'] = []): string => {
-    if (!videos.length) return '';
-    
-    return `<div class="video-gallery">
-      ${videos.map(video => {
-        if (video.type === 'iframe') {
-          return `<div class="video-embed">
-            <iframe src="${escapeHTML(video.url)}" frameborder="0" allowfullscreen></iframe>
-          </div>`;
-        } else {
-          return `<div class="video-player">
-            <video controls ${video.thumbnail ? `poster="${escapeHTML(video.thumbnail)}"` : ''}>
-              <source src="${escapeHTML(video.url)}" type="${escapeHTML(video.type)}">
-              Your browser does not support video playback.
-            </video>
-          </div>`;
-        }
-      }).join('')}
-    </div>`;
-  };
-  
-  // Format content text with paragraphs
-  const formatTextContent = (text: string): string => {
-    // Split by double newlines to find paragraphs
-    return text
-      .split(/\n{2,}/)
-      .map(p => p.trim())
-      .filter(p => p)
-      .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
-      .join('\n');
-  };
-  
-  // Create a nicely formatted HTML document
+/**
+ * Converts Markdown to HTML for rich clipboard copying
+ */
+const markdownToHtml = (markdown: string): string => {
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>${escapeHTML(content.title)}</title>
+  <title>Copied Content</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
     h1 { font-size: 1.8em; margin-bottom: 10px; }
-    .source { color: #555; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+    h2 { font-size: 1.6em; margin-top: 30px; margin-bottom: 10px; }
+    h3 { font-size: 1.4em; margin-top: 25px; margin-bottom: 10px; }
+    h4, h5, h6 { margin-top: 20px; margin-bottom: 10px; }
     .content { margin-top: 20px; }
     p { margin-bottom: 1em; }
-    figure { margin: 1.5em 0; }
-    figure img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
-    figcaption { text-align: center; font-size: 0.9em; color: #666; margin-top: 0.5em; }
-    .image-gallery, .video-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
-    .video-embed, .video-player { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; }
-    .video-embed iframe, .video-player video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    .footer { margin-top: 30px; color: #777; font-size: 0.9em; border-top: 1px solid #eee; padding-top: 10px; }
+    strong { font-weight: bold; }
+    em { font-style: italic; }
+    code { font-family: monospace; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; }
+    pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    pre code { background-color: transparent; padding: 0; }
+    blockquote { border-left: 3px solid #ddd; padding-left: 10px; color: #555; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; display: block; margin: 1em 0; }
+    ul, ol { margin: 1em 0; padding-left: 2em; }
+    li { margin-bottom: 0.5em; }
   </style>
 </head>
 <body>
-  <h1>${escapeHTML(content.title)}</h1>
-  <div class="source">
-    Source: <a href="${escapeHTML(content.url)}">${escapeHTML(content.url)}</a>
-  </div>
   <div class="content">
-    ${formatTextContent(escapeHTML(content.content))}
-    ${generateImagesHTML(content.images)}
-    ${generateVideosHTML(content.videos)}
-  </div>
-  <div class="footer">
-    Extracted via Copy to Notion Extension
+    ${markdown
+      // Headers
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+      .replace(/^##### (.+)$/gm, '<h5>$1</h5>')
+      .replace(/^###### (.+)$/gm, '<h6>$1</h6>')
+      // Bold and italic
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\_(.+?)\_/g, '<em>$1</em>')
+      // Code blocks
+      .replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      // Links
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+      // Images
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">')
+      // Lists
+      .replace(/^• (.+)$/gm, '<li>$1</li>')
+      .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+      // Blockquotes
+      .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+      // Paragraphs (must be last)
+      .split('\n\n')
+      .map(p => p.trim())
+      .filter(p => p && !p.startsWith('<h') && !p.startsWith('<pre>') && !p.startsWith('<blockquote>') && !p.startsWith('<li>'))
+      .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+      .join('\n')}
   </div>
 </body>
 </html>`;
 };
 
-// Function to format content as Markdown with images
+// Function to format content as Markdown with images at their original positions
 const formatContentAsMarkdown = (content: EnhancedContent): string => {
-  // Format images
-  const formatImages = (images: EnhancedContent['images'] = []): string => {
-    if (!images.length) return '';
-    
-    return '\n\n## Images\n\n' + 
-      images.map(img => `![${img.alt || 'Image'}](${img.url})`).join('\n\n');
-  };
-  
-  // Format videos
-  const formatVideos = (videos: EnhancedContent['videos'] = []): string => {
-    if (!videos.length) return '';
-    
-    return '\n\n## Videos\n\n' + 
-      videos.map(video => `🎥 [Video](${video.url})`).join('\n\n');
-  };
-  
-  return `# ${content.title || 'Untitled Page'}
-
-**URL:** ${content.url || 'No URL'}
-
-## Content
-
-${content.content}
-
-${formatImages(content.images)}
-${formatVideos(content.videos)}
-
----
-*Extracted via Copy to Notion Extension*`;
+  // The content already has images and formatting preserved in their original positions
+  // from the extraction process, so we can just return it directly
+  return content.content;
 };
 
 export const copyToClipboard = async (): Promise<{ success: boolean; message: string }> => {
@@ -410,8 +382,8 @@ export const copyToClipboard = async (): Promise<{ success: boolean; message: st
     });
 
     // Format content for both HTML and plain text with rich media support
-    const htmlContent = formatContentAsHTML(enhancedContent);
     const markdownContent = formatContentAsMarkdown(enhancedContent);
+    const htmlContent = markdownToHtml(markdownContent);
 
     try {
       // Try to use the more advanced ClipboardItem API for HTML formatting

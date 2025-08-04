@@ -1,289 +1,301 @@
 /**
  * Enhanced Content Extraction Module
  * Supports rich content extraction including images, links, and videos
+ * with proper formatting for Notion compatibility
  */
 
 export interface EnhancedContent {
   title: string;
   url: string;
   content: string;
-  images: string[];
-  videos: string[];
-  favicon: string;
-  metadata: {
+  html: string;
+  images: Array<{
+    url: string;
+    alt?: string;
+    width?: number;
+    height?: number;
+  }>;
+  videos: Array<{
+    url: string;
+    type: string;
+    thumbnail?: string;
+  }>;
+  metadata?: {
     description?: string;
     author?: string;
     publishDate?: string;
   };
 }
 
-// Function to execute in target page to get complete content
-const executeExtraction = (): EnhancedContent => {
-  // Utility functions
-  const cleanHtml = (html: string): string => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+/**
+ * Extract full page content with rich media and formatting
+ */
+export const extractFullPageContent = async (): Promise<EnhancedContent> => {
+  try {
+    console.log('📋 Starting full DOM extraction with media...');
     
-    // Remove unwanted elements
-    const elementsToRemove = [
-      'script', 'style', 'iframe:not([src*="youtube"]):not([src*="vimeo"])', 
-      'noscript', '.ad', '.ads', '.advertisement', 
-      'form', '.comments', '.comment-section',
-      'nav', 'header:not(:first-child)', 'footer',
-      '[role="banner"]', '[role="navigation"]'
-    ];
+    // Get title
+    const pageTitle = document.title || 
+                      document.querySelector('h1')?.textContent ||
+                      'Untitled Page';
+                  
+    // Find main content container
+    const findMainContent = (): Element => {
+      const selectors = [
+        'main', 
+        'article', 
+        '[role="main"]',
+        '.content', 
+        '.post-content',
+        '.entry-content',
+        '.article-content',
+        '#content',
+        '.main-content'
+      ];
+      
+      for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element && element.textContent && element.textContent.trim().length > 100) {
+          return element;
+        }
+      }
+      return document.body;
+    };
     
-    elementsToRemove.forEach(selector => {
-      tempDiv.querySelectorAll(selector).forEach(el => el.remove());
-    });
+    const mainContent = findMainContent();
     
-    return tempDiv.innerHTML;
-  };
-
-  const getMainContent = (): HTMLElement | null => {
-    // Try different strategies to find main content
-    const contentSelectors = [
-      'article', 
-      'main',
-      '.content', 
-      '#content', 
-      '.post-content',
-      '.article-content',
-      '.entry-content',
-      'div.main-content',
-      '[role="main"]',
-      // Fallback to looking for the largest content block
-      'section',
-      '.container',
-      'div.post',
-      'div.page'
-    ];
+    // Extract images - get all images in main content or top level visible images
+    const images: Array<{
+      url: string;
+      alt?: string;
+      width?: number;
+      height?: number;
+    }> = [];
     
-    // Try each selector
-    for (const selector of contentSelectors) {
-      const elements = document.querySelectorAll<HTMLElement>(selector);
-      if (elements.length > 0) {
-        // Find element with most text content
-        let bestElement = elements[0];
-        let maxLength = bestElement.innerText.length;
+    const imageElements = mainContent.querySelectorAll('img');
+    
+    for (const img of Array.from(imageElements)) {
+      // Check if image is visible and has decent size
+      const rect = img.getBoundingClientRect();
+      const isVisible = rect.width > 50 && rect.height > 50 && 
+                       window.getComputedStyle(img).display !== 'none';
+      
+      if (isVisible) {
+        let imgUrl = img.getAttribute('src') || '';
         
-        for (let i = 1; i < elements.length; i++) {
-          const length = elements[i].innerText.length;
-          if (length > maxLength) {
-            maxLength = length;
-            bestElement = elements[i];
+        // Fix relative URLs
+        if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('data:')) {
+          if (imgUrl.startsWith('/')) {
+            const origin = window.location.origin;
+            imgUrl = origin + imgUrl;
+          } else {
+            const base = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+            imgUrl = base + imgUrl;
           }
         }
         
-        if (maxLength > 200) { // Only if it has substantial content
-          return bestElement;
-        }
+        images.push({
+          url: imgUrl,
+          alt: img.getAttribute('alt') || '',
+          width: img.naturalWidth || rect.width,
+          height: img.naturalHeight || rect.height
+        });
       }
     }
     
-    // Last resort: body
-    return document.body;
-  };
-  
-  // Extract images, ensuring we get full URLs
-  const getImages = (): string[] => {
-    const mainContent = getMainContent();
-    const images: string[] = [];
+    // Extract videos - look for video elements and iframes (youtube, etc.)
+    const videos: Array<{
+      url: string;
+      type: string;
+      thumbnail?: string;
+    }> = [];
     
-    if (mainContent) {
-      mainContent.querySelectorAll('img[src]').forEach(img => {
-        const src = (img as HTMLImageElement).src;
-        if (src && !src.startsWith('data:') && src.trim() !== '') {
-          // Filter out tiny images (likely icons, etc)
-          const width = (img as HTMLImageElement).width;
-          const height = (img as HTMLImageElement).height;
-          
-          if (width > 100 && height > 100) {
-            images.push(src);
-          }
-        }
-      });
+    // HTML5 video elements
+    const videoElements = mainContent.querySelectorAll('video');
+    for (const video of Array.from(videoElements)) {
+      const src = video.getAttribute('src') || video.querySelector('source')?.getAttribute('src') || '';
+      if (src) {
+        videos.push({
+          url: src,
+          type: 'video/mp4',
+          thumbnail: video.getAttribute('poster') || ''
+        });
+      }
     }
     
-    return images;
-  };
-  
-  // Extract videos (YouTube, Vimeo, etc)
-  const getVideos = (): string[] => {
-    const videos: string[] = [];
+    // YouTube and other embedded videos
+    const iframes = mainContent.querySelectorAll('iframe');
+    for (const iframe of Array.from(iframes)) {
+      const src = iframe.getAttribute('src') || '';
+      if (src && (
+          src.includes('youtube.com') || 
+          src.includes('vimeo.com') || 
+          src.includes('dailymotion.com')
+        )) {
+        videos.push({
+          url: src,
+          type: 'iframe',
+          thumbnail: ''
+        });
+      }
+    }
     
-    // YouTube and Vimeo iframes
-    document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"]').forEach(iframe => {
-      videos.push((iframe as HTMLIFrameElement).src);
+    // Create a clone of content to extract text and links properly
+    const clonedContent = mainContent.cloneNode(true) as Element;
+    
+    // Remove unwanted elements from clone
+    const unwantedSelectors = [
+      'script', 'style', 'noscript', 'iframe',
+      'nav:not(.content-nav)', 'header:not(.content-header)', 
+      'footer:not(.content-footer)', 'aside',
+      '.navigation', '.navbar', '.menu',
+      '.sidebar', '.widget', '.ad', '.ads',
+      '.advertisement', '.comments', '.cookie-notice'
+    ];
+
+    unwantedSelectors.forEach(selector => {
+      const elements = clonedContent.querySelectorAll(selector);
+      elements.forEach(el => el.remove());
     });
     
-    // HTML5 videos
-    document.querySelectorAll('video[src]').forEach(video => {
-      videos.push((video as HTMLVideoElement).src);
-    });
-    
-    return videos;
-  };
-  
-  // Get page metadata
-  const getMetadata = () => {
-    const getMetaContent = (name: string): string | undefined => {
-      const meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"], meta[property="og:${name}"], meta[name="og:${name}"]`);
-      return meta ? (meta as HTMLMetaElement).content : undefined;
+    // Convert the DOM to structured Markdown with text formatting preserved
+    const processNode = (node: Node): string => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.textContent || '';
+      }
+      
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return '';
+      }
+      
+      const element = node as Element;
+      const tag = element.tagName.toLowerCase();
+      
+      // Skip invisible elements
+      const computedStyle = window.getComputedStyle(element);
+      if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') {
+        return '';
+      }
+      
+      // Process based on tag
+      switch(tag) {
+        case 'br':
+          return '\n';
+        case 'p':
+          return '\n\n' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
+        case 'h1':
+          return '\n\n# ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
+        case 'h2':
+          return '\n\n## ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
+        case 'h3':
+          return '\n\n### ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
+        case 'h4':
+          return '\n\n#### ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
+        case 'h5':
+          return '\n\n##### ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
+        case 'h6':
+          return '\n\n###### ' + Array.from(element.childNodes).map(processNode).join('') + '\n\n';
+        case 'div':
+          return '\n' + Array.from(element.childNodes).map(processNode).join('') + '\n';
+        case 'a':
+          const href = element.getAttribute('href') || '';
+          const text = Array.from(element.childNodes).map(processNode).join('').trim();
+          // If href is empty or just a hash, only return the text
+          if (!href || href === '#') return text;
+          // Fix relative URLs
+          let fullHref = href;
+          if (href && !href.startsWith('http') && !href.startsWith('mailto:')) {
+            if (href.startsWith('/')) {
+              const origin = window.location.origin;
+              fullHref = origin + href;
+            } else {
+              const base = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+              fullHref = base + href;
+            }
+          }
+          return `[${text}](${fullHref})`;
+        case 'img':
+          const src = element.getAttribute('src') || '';
+          const alt = element.getAttribute('alt') || 'Image';
+          return `![${alt}](${src})`;
+        case 'ul':
+          return '\n' + Array.from(element.childNodes).map(processNode).join('') + '\n';
+        case 'ol':
+          // Track ordered list items properly
+          let index = 1;
+          return '\n' + Array.from(element.childNodes)
+            .filter(node => node.nodeType === Node.ELEMENT_NODE && 
+                   (node as Element).tagName.toLowerCase() === 'li')
+            .map(node => {
+              const liContent = processNode(node).replace(/^•\s+/, ''); // Remove bullet if present
+              return `${index++}. ${liContent}`;
+            })
+            .join('\n') + '\n';
+        case 'li':
+          const parentTag = element.parentElement?.tagName.toLowerCase();
+          if (parentTag === 'ol') {
+            // This will be handled by the ol case
+            return Array.from(element.childNodes).map(processNode).join('');
+          }
+          return '\n• ' + Array.from(element.childNodes).map(processNode).join('');
+        case 'strong':
+        case 'b':
+          return '**' + Array.from(element.childNodes).map(processNode).join('') + '**';
+        case 'em':
+        case 'i':
+          return '_' + Array.from(element.childNodes).map(processNode).join('') + '_';
+        case 'code':
+          return '`' + Array.from(element.childNodes).map(processNode).join('') + '`';
+        case 'pre':
+          return '\n```\n' + Array.from(element.childNodes).map(processNode).join('') + '\n```\n';
+        case 'blockquote':
+          return '\n> ' + Array.from(element.childNodes).map(processNode).join('').replace(/\n/g, '\n> ') + '\n';
+        default:
+          return Array.from(element.childNodes).map(processNode).join('');
+      }
     };
     
+    // Get full text with formatting preserved
+    const extractedText = processNode(clonedContent);
+    
+    // Clean up excessive whitespace
+    const cleanedText = extractedText
+      .replace(/\n{3,}/g, '\n\n')  // Replace multiple newlines with double newline
+      .replace(/[ \t]+/g, ' ')     // Replace multiple spaces with single space
+      .trim();
+    
+    // Get metadata
+    const getMetadata = () => {
+      const getMetaContent = (name: string): string | undefined => {
+        const meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"], meta[property="og:${name}"], meta[name="og:${name}"]`);
+        return meta ? (meta as HTMLMetaElement).content : undefined;
+      };
+      
+      return {
+        description: getMetaContent('description'),
+        author: getMetaContent('author'),
+        publishDate: getMetaContent('published_time') || getMetaContent('article:published_time')
+      };
+    };
+      
     return {
-      description: getMetaContent('description'),
-      author: getMetaContent('author'),
-      publishDate: getMetaContent('published_time') || getMetaContent('article:published_time')
+      title: pageTitle,
+      url: window.location.href,
+      content: cleanedText,
+      html: clonedContent.innerHTML,
+      images,
+      videos,
+      metadata: getMetadata()
     };
-  };
-  
-  // Main extraction logic
-  const mainElement = getMainContent();
-  const title = document.title;
-  const url = window.location.href;
-  const favicon = document.querySelector('link[rel="shortcut icon"], link[rel="icon"]')?.getAttribute('href') || '/favicon.ico';
-  
-  let content = '';
-  if (mainElement) {
-    content = cleanHtml(mainElement.innerHTML);
-  } else {
-    content = cleanHtml(document.body.innerHTML);
+  } catch (error) {
+    console.error('Error extracting enhanced content:', error);
+    return {
+      title: document.title || 'Error extracting content',
+      url: window.location.href,
+      content: 'Failed to extract content: ' + ((error as Error)?.message || 'Unknown error'),
+      html: '<p>Extraction failed</p>',
+      images: [],
+      videos: []
+    };
   }
-  
-  return {
-    title,
-    url,
-    content,
-    images: getImages(),
-    videos: getVideos(),
-    favicon: new URL(favicon, document.baseURI).href,
-    metadata: getMetadata()
-  };
-};
-
-/**
- * Extract full page content with rich media support
- */
-export const extractFullPageContent = async (tabId?: number): Promise<EnhancedContent> => {
-  // If we're already in the content script context, run the extraction directly
-  if (typeof tabId === 'undefined') {
-    console.log('Running extraction directly in content script');
-    return executeExtraction();
-  }
-  
-  console.log('Running extraction via executeScript in tab:', tabId);
-  // Execute the script in the tab
-  const result = await chrome.scripting.executeScript({
-    target: { tabId },
-    func: executeExtraction,
-  });
-  
-  if (!result || !result[0] || !result[0].result) {
-    throw new Error('Không thể trích xuất nội dung từ trang');
-  }
-  
-  return result[0].result as EnhancedContent;
-};
-
-/**
- * Format the extracted content as HTML
- */
-export const formatContentAsHTML = (content: EnhancedContent): string => {
-  let htmlOutput = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-      <h1 style="font-size: 24px; margin-bottom: 10px;">${content.title}</h1>
-      <p style="color: #666; margin-bottom: 20px;">
-        <a href="${content.url}" style="color: #0366d6; text-decoration: none;" target="_blank">Nguồn gốc: ${content.url}</a>
-      </p>
-  `;
-  
-  // Add rich content
-  htmlOutput += `<div style="line-height: 1.6;">${content.content}</div>`;
-  
-  // Add image gallery if there are images
-  if (content.images && content.images.length > 0) {
-    htmlOutput += `
-      <div style="margin-top: 30px;">
-        <h2 style="font-size: 20px; margin-bottom: 15px;">Ảnh (${content.images.length})</h2>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-    `;
-    
-    content.images.forEach(imgSrc => {
-      htmlOutput += `
-        <div style="margin-bottom: 15px; flex: 0 0 calc(33.33% - 10px);">
-          <img src="${imgSrc}" style="max-width: 100%; border-radius: 4px; border: 1px solid #eee;" />
-        </div>
-      `;
-    });
-    
-    htmlOutput += `</div></div>`;
-  }
-  
-  // Add videos if there are any
-  if (content.videos && content.videos.length > 0) {
-    htmlOutput += `
-      <div style="margin-top: 30px;">
-        <h2 style="font-size: 20px; margin-bottom: 15px;">Video (${content.videos.length})</h2>
-    `;
-    
-    content.videos.forEach(videoSrc => {
-      htmlOutput += `
-        <div style="margin-bottom: 20px;">
-          <iframe src="${videoSrc}" style="width: 100%; height: 400px; border: none; border-radius: 4px;" allowfullscreen></iframe>
-        </div>
-      `;
-    });
-    
-    htmlOutput += `</div>`;
-  }
-  
-  // Close the main container
-  htmlOutput += `
-      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 13px;">
-        Copied with "Copy to Notion" extension
-      </div>
-    </div>
-  `;
-  
-  return htmlOutput;
-};
-
-/**
- * Format the extracted content as Markdown (for plain text fallback)
- */
-export const formatContentAsMarkdown = (content: EnhancedContent): string => {
-  let markdown = `# ${content.title}\n\n`;
-  markdown += `Source: ${content.url}\n\n`;
-  
-  // Convert HTML content to markdown-like format
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = content.content;
-  
-  // Extract text content, preserving some structure
-  const textContent = tempDiv.textContent || tempDiv.innerText || '';
-  markdown += textContent.trim() + '\n\n';
-  
-  // Add images as markdown links
-  if (content.images && content.images.length > 0) {
-    markdown += `## Images (${content.images.length})\n\n`;
-    
-    content.images.forEach(imgSrc => {
-      markdown += `![Image](${imgSrc})\n\n`;
-    });
-  }
-  
-  // Add videos as links
-  if (content.videos && content.videos.length > 0) {
-    markdown += `## Videos (${content.videos.length})\n\n`;
-    
-    content.videos.forEach(videoSrc => {
-      markdown += `Video: ${videoSrc}\n\n`;
-    });
-  }
-  
-  markdown += '---\nCopied with "Copy to Notion" extension';
-  
-  return markdown;
 };
