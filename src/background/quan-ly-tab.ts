@@ -145,13 +145,7 @@ export class QuanLyTab {
       const isInjected = results[0]?.result;
 
       if (!isInjected) {
-        // Inject our content script
-        await chrome.scripting.executeScript({
-          target: { tabId },
-          files: ['content-script.js']
-        });
-
-        // Mark as injected
+        // Mark as injected (we don't need external content script file)
         await chrome.scripting.executeScript({
           target: { tabId },
           func: () => { (window as any).contentScriptInjected = true; }

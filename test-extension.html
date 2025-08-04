@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Extension - Copy to Notion</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .header {
+      background: #f5f5f5;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    
+    .content {
+      background: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .test-actions {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    h1, h2, h3 {
+      color: #333;
+    }
+    
+    .highlight {
+      background: #fff3cd;
+      padding: 10px;
+      border-radius: 4px;
+      border-left: 4px solid #ffc107;
+    }
+    
+    .code {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      border: 1px solid #e9ecef;
+    }
+    
+    ul {
+      padding-left: 20px;
+    }
+    
+    li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧪 Test Page - Copy to Notion Extension</h1>
+    <p>Trang test này giúp kiểm tra các tính năng của extension Copy to Notion.</p>
+  </div>
+
+  <div class="test-actions">
+    <h2>📋 Hướng dẫn test:</h2>
+    <ol>
+      <li><strong>Load Extension:</strong> Vào chrome://extensions, enable Developer mode, load unpacked từ thư mục <code>dist</code></li>
+      <li><strong>Mở Extension:</strong> Click vào icon extension trên toolbar</li>
+      <li><strong>Test Settings:</strong> Nhập API key Notion và chọn database</li>
+      <li><strong>Test Content Extraction:</strong> Click "Copy Current Page" để test việc trích xuất nội dung</li>
+    </ol>
+  </div>
+
+  <div class="content">
+    <h2>📝 Nội dung mẫu để test</h2>
+    
+    <h3>Đây là tiêu đề H3</h3>
+    <p>Đây là một đoạn văn bản bình thường với <strong>text đậm</strong> và <em>text nghiêng</em>.</p>
+    
+    <div class="highlight">
+      <p>Đây là một đoạn text được highlight để test việc trích xuất các element đặc biệt.</p>
+    </div>
+    
+    <h3>📋 Danh sách để test</h3>
+    <ul>
+      <li>Item 1 - Test bullet point</li>
+      <li>Item 2 - Với <strong>formatting</strong></li>
+      <li>Item 3 - Và <a href="#test">link test</a></li>
+    </ul>
+    
+    <h3>🔗 Links để test</h3>
+    <p>Đây là một <a href="https://notion.so" target="_blank">link external</a> và đây là <a href="#internal">link internal</a>.</p>
+    
+    <div class="code">
+      <h4>💻 Code block để test</h4>
+      <pre>
+function testFunction() {
+  console.log("Extension đang hoạt động!");
+  return true;
+}
+      </pre>
+    </div>
+    
+    <h3>🖼️ Image placeholder</h3>
+    <p>[Image sẽ được test riêng - extension cần handle image URLs]</p>
+    
+    <h3>📊 Table để test</h3>
+    <table border="1" style="border-collapse: collapse; width: 100%;">
+      <tr>
+        <th style="padding: 8px;">Header 1</th>
+        <th style="padding: 8px;">Header 2</th>
+        <th style="padding: 8px;">Header 3</th>
+      </tr>
+      <tr>
+        <td style="padding: 8px;">Data 1</td>
+        <td style="padding: 8px;">Data 2</td>
+        <td style="padding: 8px;">Data 3</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px;">Row 2 Col 1</td>
+        <td style="padding: 8px;">Row 2 Col 2</td>
+        <td style="padding: 8px;">Row 2 Col 3</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="content">
+    <h2>🔧 Debugging Information</h2>
+    <p>Mở <strong>Chrome DevTools</strong> (F12) và check:</p>
+    <ul>
+      <li><strong>Console tab:</strong> Xem logs từ extension</li>
+      <li><strong>Sources tab:</strong> Debug extension code nếu cần</li>
+      <li><strong>Application tab > Storage:</strong> Kiểm tra Chrome storage</li>
+    </ul>
+    
+    <div class="highlight">
+      <h4>🚨 Expected Behaviors:</h4>
+      <ul>
+        <li>Extension icon xuất hiện trên toolbar</li>
+        <li>Click vào icon hiện popup với UI Settings</li>
+        <li>API key input và database selection hoạt động</li>
+        <li>Console hiển thị logs từ service worker</li>
+        <li>Content extraction trả về structured data</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="content">
+    <h2>🔍 Common Issues & Solutions</h2>
+    
+    <h3>❌ "API key is required" error:</h3>
+    <ul>
+      <li>Đảm bảo API key được nhập đúng format</li>
+      <li>Check Chrome storage xem key đã được lưu chưa</li>
+      <li>Verify parameter passing giữa popup và background</li>
+    </ul>
+    
+    <h3>❌ "0 databases found" error:</h3>
+    <ul>
+      <li>Đảm bảo API key có quyền truy cập databases</li>
+      <li>Tạo ít nhất 1 database trong Notion workspace</li>
+      <li>Check network requests trong DevTools</li>
+    </ul>
+    
+    <h3>❌ Extension không load:</h3>
+    <ul>
+      <li>Verify manifest.json syntax</li>
+      <li>Check console errors trong extension page</li>
+      <li>Reload extension sau khi fix</li>
+    </ul>
+  </div>
+
+  <script>
+    // Script để test việc extract content
+    console.log('🧪 Test page loaded - ready for extension testing');
+    
+    // Add test data to window for extension to access
+    window.testData = {
+      title: document.title,
+      url: window.location.href,
+      content: 'Test content extraction',
+      timestamp: new Date().toISOString()
+    };
+    
+    // Log để extension có thể detect
+    console.log('📊 Test data available:', window.testData);
+  </script>
+</body>
+</html>

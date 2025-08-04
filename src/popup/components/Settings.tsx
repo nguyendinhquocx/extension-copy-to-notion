@@ -43,7 +43,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
     try {
       const response = await chrome.runtime.sendMessage({
         action: 'LUU_API_KEY',
-        data: { api_key: apiKey }
+        apiKey: apiKey
       });
 
       if (response.success) {
@@ -90,7 +90,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
     try {
       const response = await chrome.runtime.sendMessage({
         action: 'CHON_DATABASE',
-        data: { database_id: selectedDatabase }
+        databaseId: selectedDatabase
       });
 
       if (response.success) {
